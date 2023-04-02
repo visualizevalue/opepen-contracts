@@ -1,0 +1,16 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+
+#Tests
+test/dist/*
+!test/dist/.gitkeep
+
+#Hardhat files
+cache
+artifacts
+
+#OS
+.DS_Store
