@@ -36,6 +36,12 @@ contract ZoraEdition is ERC721Burnable {
         // ...
     }
 
+    /// @notice Contract URI Getter, proxies to metadataRenderer
+    /// @return Contract URI
+    function contractURI() external view returns (string memory) {
+        // ...
+    }
+
     /// @dev Error when burning unapproved tokens.
     error TransferCallerNotOwnerNorApproved();
 }

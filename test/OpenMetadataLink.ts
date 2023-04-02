@@ -60,8 +60,13 @@ describe('OpepenMetadataLink', function () {
     })
   })
 
-  describe('pingMetadataUpdate', function () {
-    it('should emit a MetadataUpdate event', async function () {
+  describe('Connect Renderer', function () {
+    it('should revert if not called by the edition', async function () {
+      await expect(contract.pingMetadataUpdate('0x123456789abcdef'))
+        .to.be.revertedWith('Only the opepen edition can ping for an update.')
+    })
+
+    it('should emit Metadata Update events when pinging the renderer', async function () {
       const metadataHash = '0x123456789abcdef'
       const opepenContract = await ethers.getContractAt('ZoraEdition', '0x6339e5E072086621540D0362C4e3Cea0d643E114')
 
@@ -83,9 +88,13 @@ describe('OpepenMetadataLink', function () {
         .to.emit(contract, 'MetadataUpdate').withArgs(metadataHash)
     })
 
-    it('should revert if not called by the edition', async function () {
-      await expect(contract.pingMetadataUpdate('0x123456789abcdef'))
-        .to.be.revertedWith('Only the opepen edition can ping for an update.')
+    it('link to the correct metadata urls', async function () {
+      // Switch the metadata renderer
+      const opepenContract = await ethers.getContractAt('ZoraEdition', '0x6339e5E072086621540D0362C4e3Cea0d643E114')
+      await opepenContract.connect(admin).setMetadataRenderer(contract.address, ethers.utils.arrayify(0))
+
+      expect(await opepenContract.contractURI()).to.equal('https://example.com/contract')
+      expect(await opepenContract.tokenURI(1)).to.equal('https://example.com/tokens/1/metadata.json')
     })
   })
 })
