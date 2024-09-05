@@ -1,6 +1,6 @@
 export const deployOpepenMetadataLink = async (ethers) => {
   const OpepenMetadataLink = await ethers.getContractFactory('OpepenMetadataLink')
-  const opepenMetadataLink = await OpepenMetadataLink.deploy('https://asdfa', 'https://asdfasdfasdf')
+  const opepenMetadataLink = await OpepenMetadataLink.deploy('https://metadata.opepen.art/opepen.json', 'https://metadata.opepen.art')
   await opepenMetadataLink.deployed()
   console.log(`     Deployed OpepenMetadataLink at ${opepenMetadataLink.address}`)
 

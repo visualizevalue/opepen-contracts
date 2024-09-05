@@ -39,29 +39,16 @@ contract OpepenMetadataRouter is Ownable {
         }
     }
 
-    /// @notice Links an array of tokenIDs to custom metadata URIs
-    /// @param tokenIDs The array of tokenIDs to link
-    /// @param uris The array of metadata URIs to link to the tokenIDs
-    function setTokenMetadataURIs(uint256[] memory tokenIDs, string[] memory uris) public onlyOwner {
-        require(tokenIDs.length == uris.length, "Bad configuration.");
-
-        for (uint i = 0; i < tokenIDs.length; i++) {
-            tokenMetadataURIs[tokenIDs[i]] = uris[i];
-        }
-    }
-
     /// @notice Get the metadataURI for a specific token
     /// @param tokenID The array of tokenIDs to link
     function getTokenMetadataURI(uint256 tokenID) public view returns (string memory) {
-        string memory tokenMetadataURI = tokenMetadataURIs[tokenID];
+        uint256 set = tokenSet[tokenID];
+        if (set > 0) {
+            address rendererAddress = setRenderers[set];
 
-        if (bytes(tokenMetadataURI).length > 0) {
-            return tokenMetadataURI;
-        }
-
-        uint256 subEdition = tokenSubEditionKeys[tokenID];
-        if (subEdition > 0) {
-            return subEditionMetadataURIs[subEdition];
+            if (rendererAddress != address(0)) {
+                return IOpepenSetMetadataRenderer(rendererAddress).tokenURI(tokenID);
+            }
         }
 
         return defaultMetadataURI;
