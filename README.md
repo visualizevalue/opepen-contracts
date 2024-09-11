@@ -14,7 +14,7 @@ We want to be able to resolve the edition size for each token without leaving th
 
 Further, we need to resolve the set for each token onchain.
 
-- We have 200 sets, identified by a byte (uint8 < 256) 
+- We have 200 sets, identified by a byte (uint8 < 256)
 - We can fit 32 sets in one storage slot.
 - We batch store the token ID -> set in 500 groups of 32.
 
