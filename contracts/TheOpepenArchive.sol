@@ -10,6 +10,12 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     /// @notice The Opepen Edition address
     address public constant EDITION = 0x6339e5E072086621540D0362C4e3Cea0d643E114;
 
+    uint8[6] public EDITION_SIZES = [40, 20, 10, 5, 4, 1];
+
+    // @dev We store 80 token categories in a single uint256;
+    //      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
+    mapping(uint256 => uint256) private tokenEditions;
+
     /// @dev Default metadata URI for tokens
     string public defaultMetadataURI;
 
@@ -51,4 +57,23 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
         return defaultMetadataURI;
     }
+
+    /// @notice Batch save token edition sizes
+    function batchSaveTokenEditions(uint256[] calldata groupIndices, uint256[] calldata editions) external requireSenderAdmin(EDITION) {
+        require(groupIndices.length == editions.length, "Input array length mismatch.");
+
+        for (uint256 i = 0; i < groupIndices.length; i++) {
+            tokenEditions[groupIndices[i]] = editions[i];
+        }
+    }
+
+    /// @notice Get the edition size for a token
+    function getTokenEdition(uint256 tokenId) external view returns (uint8) {
+        uint256 groupIndex = (tokenId - 1) / 80;
+        uint8 bitPosition = uint8(((tokenId - 1) % 80) * 3);
+
+        uint256 packed = tokenEditions[groupIndex];
+        return EDITION_SIZES[(packed >> bitPosition) & 7];
+    }
 }
+
