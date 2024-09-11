@@ -21,34 +21,23 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
     /// @notice Sets the default metadata URI for tokens
     /// @param metadataURI The metadata URI to set
-    function setDefaultMetadataURI(string memory metadataURI) public onlyAdmin {
+    function setDefaultMetadataURI(string memory metadataURI) public requireSenderAdmin(EDITION) {
         defaultMetadataURI = metadataURI;
     }
 
     /// @notice Sets a custom metadata URI for a specific set
     /// @param id The id of the set for which to store the metadata URI
     /// @param metadataURI The metadata URI to set
-    function setCustomMetadataURI(uint256 id, string memory metadataURI) public onlyAdmin {
-        setMetadataURIs[key] = metadataURI;
+    function setCustomMetadataURI(uint256 id, string memory metadataURI) public requireSenderAdmin(EDITION) {
+        setMetadataURIs[id] = metadataURI;
     }
 
     /// @notice Links an array of tokenIDs to a custom key
     /// @param tokenIDs The array of tokenIDs to link
     /// @param key The key to link the tokens to
-    function linkTokensToSubEditionMetadataKeys(uint256[] memory tokenIDs, uint256 key) public onlyAdmin {
+    function linkTokensToSubEditionMetadataKeys(uint256[] memory tokenIDs, uint256 key) public requireSenderAdmin(EDITION) {
         for (uint i = 0; i < tokenIDs.length; i++) {
             tokenSubEditionKeys[tokenIDs[i]] = key;
-        }
-    }
-
-    /// @notice Links an array of tokenIDs to custom metadata URIs TODO: Rework this into packed data?
-    /// @param tokenIDs The array of tokenIDs to link
-    /// @param uris The array of metadata URIs to link to the tokenIDs
-    function setTokenMetadataURIs(uint256[] memory tokenIDs, string[] memory uris) public onlyAdmin {
-        require(tokenIDs.length == uris.length, "Bad configuration.");
-
-        for (uint i = 0; i < tokenIDs.length; i++) {
-            tokenMetadataURIs[tokenIDs[i]] = uris[i];
         }
     }
 
@@ -61,10 +50,5 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
         }
 
         return defaultMetadataURI;
-    }
-
-    /// @dev Only allow VV to update the archive
-    modifier onlyAdmin internal requireSenderAdmin(EDITION) {
-        _;
     }
 }
