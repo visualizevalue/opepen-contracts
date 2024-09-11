@@ -4,7 +4,7 @@ import { opepenArchiveFixture, opepenArchiveSavedEditionsFixture } from './fixtu
 import { prepareTokenSetsData, prepareTokenSetsDataForSet } from '../helpers/token-sets'
 import { VV } from '../helpers/constants'
 
-describe.only('TheOpepenArchive', function () {
+describe('TheOpepenArchive', function () {
   describe('Token Editions', function () {
     it('should store the editions for each token', async function () {
       const { contract } = await loadFixture(opepenArchiveSavedEditionsFixture)

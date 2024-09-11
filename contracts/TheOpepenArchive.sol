@@ -11,16 +11,17 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     /// @notice The Opepen Edition address
     address public constant EDITION = 0x6339e5E072086621540D0362C4e3Cea0d643E114;
 
+    /// @notice There are six different edition sizes in the Opepen Edition
     uint8[6] public EDITION_SIZES = [40, 20, 10, 5, 4, 1];
 
     /// @notice Default metadata URI
     string public defaultMetadataURI;
 
-    /// @notice Mapping of custom metadata renderer contracts by set id (0-200)
-    mapping(uint256 => string) public setMetadataURIs;
-
     /// @notice Mapping of custom metadata renderers by set id (0-200)
     mapping(uint256 => address) public setMetadataRenderers;
+
+    /// @notice Mapping of custom metadata renderer contracts by set id (0-200)
+    mapping(uint256 => string) public setMetadataURIs;
 
     /// @dev We store 80 token categories in a single uint256;
     ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
@@ -54,11 +55,11 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
         address setRenderer = setMetadataRenderers[set];
         if (setRenderer != address(0)) {
-            return IOpepenSetMetadataRenderer(setRenderer).tokenURI(tokenID)
+            return IOpepenSetMetadataRenderer(setRenderer).tokenURI(tokenID);
         }
 
-        uint256 setMetadataURI = setMetadataURIs[set];
-        if (setMetadataURI > 0) {
+        string memory setMetadataURI = setMetadataURIs[set];
+        if (bytes(setMetadataURI).length > 0) {
             return setMetadataURI;
         }
 
@@ -80,7 +81,7 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
     /// @notice Sets a custom metadata renderer for a specific set
     /// @param id The id of the set for which to store the metadata URI
-    /// @param address The renderer contract address to set
+    /// @param renderer The renderer contract address to set
     function setSetMetadataRenderer(uint256 id, address renderer) public requireSenderAdmin(EDITION) {
         setMetadataRenderers[id] = renderer;
     }
