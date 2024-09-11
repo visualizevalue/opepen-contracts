@@ -3,7 +3,6 @@ import path from 'path'
 import { task } from 'hardhat/config'
 import edionSizes from './../data/token-edition.json'
 import editionIndices from './../data/token-edition-index.json'
-import { hexToBigInt, pad, toHex } from 'viem'
 
 interface TokenEditions {
   [tokenId: string]: number
@@ -32,11 +31,10 @@ task('archive:prepare-rare', 'Prepare the rare opepen edition data', async (_, h
 })
 
 task('archive:pack-rare', 'Pack token <> edition data', async () => {
-  const packEditions = (editions: number[]): bigint => {
-    return editions.reduce((packed, edition, i) => {
-      return packed | (BigInt(edition) << BigInt(i * 3))
-    }, 0n)
-  }
+  const packEditions = (editions: number[]): bigint => editions.reduce(
+    (packed, edition, i) => packed | (BigInt(edition) << BigInt(i * 3)),
+    0n
+  )
 
   const data: TokenEditions = editionIndices
 
@@ -46,11 +44,6 @@ task('archive:pack-rare', 'Pack token <> edition data', async () => {
     const currentEdition: number[] = []
     for (let tokenId = groupIndex * 80 + 1; tokenId <= (groupIndex + 1) * 80; tokenId++) {
       const edition = data[tokenId.toString()]
-      // if (tokenId % 80 === 1) {
-      //   console.log(tokenId, groupIndex, edition)
-      // }
-      // console.log(tokenId, edition)
-      // return
       if (edition === undefined) throw new Error(`Undefined edition for ${tokenId}`)
       currentEdition.push(edition)
     }
