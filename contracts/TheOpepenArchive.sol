@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import { MetadataRenderAdminCheck } from "./MetadataRenderAdminCheck.sol";
-import { IMetadataRenderer } from "./interfaces/IMetadataRenderer.sol";
-import { Utilities } from "./libraries/Utilities.sol";
 
 /// @title The Opepen Archive Contract
 /// @author VisualizeValue
 /// @notice Manages Metadata for Opepens
-contract TheOpepenArchiveV2 is IMetadataRenderer, MetadataRenderAdminCheck {
+contract TheOpepenArchive is MetadataRenderAdminCheck {
     /// @notice The Opepen Edition address
     address public edition = 0x6339e5E072086621540D0362C4e3Cea0d643E114;
 
