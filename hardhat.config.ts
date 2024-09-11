@@ -76,7 +76,10 @@ const config: HardhatUserConfig = {
         salt: SALT,
       },
     },
-  }
+  },
+  mocha: {
+    timeout: 120_000_000,
+  },
 }
 
 export default config

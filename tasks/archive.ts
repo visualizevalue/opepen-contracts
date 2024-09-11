@@ -3,12 +3,14 @@ import path from 'path'
 import { task } from 'hardhat/config'
 import edionSizes from './../data/token-edition.json'
 import editionIndices from './../data/token-edition-index.json'
+import tokenSets from './../data/token-sets.json'
 
-interface TokenEditions {
+interface KeyedNumbers {
   [tokenId: string]: number
 }
-
-interface TokenEditionIndices extends TokenEditions {}
+interface TokenEditions extends KeyedNumbers {}
+interface TokenEditionIndices extends KeyedNumbers {}
+interface TokenSets extends KeyedNumbers {}
 
 const EDITION_MAP: TokenEditionIndices = {
   '40': 0,
@@ -54,5 +56,30 @@ task('archive:pack-rare', 'Pack token <> edition data', async () => {
   }
 
   fs.writeFileSync(path.resolve(__dirname, '../data/token-packed-editions.json'), JSON.stringify(packedEditions, null, 4))
+})
+
+task('archive:pack-sets', 'Pack token <> sets data', async () => {
+  const packSets = (sets: number[]): bigint => sets.reduce(
+    (packed, set, i) => packed | (BigInt(set) << BigInt(i * 8)),
+    0n
+  )
+
+  const data: TokenSets = tokenSets
+  const packedSets: string[] = []
+
+  for (let groupIndex = 0; groupIndex < 500; groupIndex++) {
+    const currentSets: number[] = []
+    for (let tokenId = groupIndex * 32 + 1; tokenId <= (groupIndex + 1) * 32; tokenId++) {
+      const set = data[tokenId.toString()]
+      if (set === undefined) throw new Error(`Undefined set for ${tokenId}`)
+      currentSets.push(set)
+    }
+
+    const packed = packSets(currentSets)
+
+    packedSets.push(packed.toString())
+  }
+
+  fs.writeFileSync(path.resolve(__dirname, '../data/token-packed-sets.json'), JSON.stringify(packedSets, null, 4))
 })
 

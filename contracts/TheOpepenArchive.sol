@@ -20,6 +20,10 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     //       We store 32 token sets in a single uint256 (8 bit per set fits 32)
     mapping(uint256 => uint256) private tokenSets;
 
+    /// @dev Mapping from set ID to packed token IDs
+    //       We store set tokens in groups of 5 with 16 tokens per uint256 (each token needs 14 bits).
+    mapping(uint8 => uint256[5]) private setTokens;
+
     /// @dev Default metadata URI for tokens
     string public defaultMetadataURI;
 
@@ -91,9 +95,9 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
     /// @notice Get the set for a token
     function getTokenSet(uint256 tokenId) external view returns (uint8) {
-        uint256 tokenGroup = tokenId / 32;
-        uint256 tokenPosition = tokenId % 32;
-        uint256 packedSetIds = tokenToSetMapping[tokenGroup];
+        uint256 tokenGroup = (tokenId - 1) / 32;
+        uint256 tokenPosition = (tokenId - 1) % 32;
+        uint256 packedSetIds = tokenSets[tokenGroup];
         return uint8((packedSetIds >> (tokenPosition * 8)) & 255);
     }
 }
