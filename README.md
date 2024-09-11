@@ -22,6 +22,8 @@ The Opepen Archive has to be able to register custom renderers per set, or a cus
 
 ## Working with Hardhat
 
+Copy the environment variables (and fill them out): `cp .env.example .env`
+
 Try running some of the following tasks:
 
 ```bash
