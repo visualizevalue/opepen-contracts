@@ -6,11 +6,19 @@ The setup for rendering Opepen metadata:
 
 ![Opepen Architecture](./opepen-archive-architecture.excalidraw.png)
 
-As a first act in moving onchain, we want to be able to resolve the edition size for each token without leaving the EVM.
+We want to be able to resolve the edition size for each token without leaving the EVM.
 
 - We have 6 edition sizes. To identify each of them we need 3 bits (`110` would be `6`).
 - Per slot (256 bits) we can store up to 85 tokens (`256/3 = 85.33`)
 - So we batch store the token ID -> edition size in 200 groups of 80 (just because of the provenance of 200 & 80 in opepen land)
+
+Further, we need to resolve the set for each token onchain.
+
+- We have 200 sets, identified by a byte (uint8 < 256) 
+- We can fit 32 sets in one storage slot.
+- We batch store the token ID -> set in 500 groups of 32.
+
+The Opepen Archive has to be able to register custom renderers per set, or a custom metadata URI (e.g. to permanently store individual sets on IPFS).
 
 ## Working with Hardhat
 
