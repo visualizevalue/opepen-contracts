@@ -20,10 +20,6 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     //       We store 32 token sets in a single uint256 (8 bit per set fits 32)
     mapping(uint256 => uint256) private tokenSets;
 
-    /// @dev Mapping from set ID to packed token IDs
-    //       We store set tokens in groups of 5 with 16 tokens per uint256 (each token needs 14 bits).
-    mapping(uint8 => uint256[5]) private setTokens;
-
     /// @dev Default metadata URI for tokens
     string public defaultMetadataURI;
 
