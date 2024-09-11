@@ -16,6 +16,10 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
     mapping(uint256 => uint256) private tokenEditions;
 
+    /// @dev Mapping from packed token IDs to their corresponding set ID
+    //       We store 32 token sets in a single uint256 (8 bit per set fits 32)
+    mapping(uint256 => uint256) private tokenSets;
+
     /// @dev Default metadata URI for tokens
     string public defaultMetadataURI;
 
@@ -74,6 +78,23 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
         uint256 packed = tokenEditions[groupIndex];
         return EDITION_SIZES[(packed >> bitPosition) & 7];
+    }
+
+    /// @notice Batch save token sets
+    function batchSaveTokenSets(uint256[] calldata groupIndices, uint256[] calldata sets) external requireSenderAdmin(EDITION) {
+        require(groupIndices.length == sets.length, "Input array length mismatch.");
+
+        for (uint256 i = 0; i < groupIndices.length; i++) {
+            tokenSets[groupIndices[i]] = sets[i];
+        }
+    }
+
+    /// @notice Get the set for a token
+    function getTokenSet(uint256 tokenId) external view returns (uint8) {
+        uint256 tokenGroup = tokenId / 32;
+        uint256 tokenPosition = tokenId % 32;
+        uint256 packedSetIds = tokenToSetMapping[tokenGroup];
+        return uint8((packedSetIds >> (tokenPosition * 8)) & 255);
     }
 }
 
