@@ -1,13 +1,86 @@
-import * as dotenv from "dotenv"
+import * as dotenv from 'dotenv'
+import { zeroAddress } from 'viem'
+import type { HardhatUserConfig } from 'hardhat/config'
+import type { HardhatNetworkUserConfig } from 'hardhat/types'
+import '@nomicfoundation/hardhat-toolbox-viem'
+import '@nomicfoundation/hardhat-ledger'
+import 'hardhat-chai-matchers-viem'
+import 'hardhat-contract-sizer'
 
-import "@nomicfoundation/hardhat-chai-matchers"
-import "@nomiclabs/hardhat-etherscan"
-import "@nomiclabs/hardhat-ethers"
-import "@typechain/hardhat"
-import "hardhat-contract-sizer"
-import "hardhat-gas-reporter"
-import "solidity-coverage"
+import './tasks/accounts'
+import './tasks/chain'
+import './tasks/export-abis'
 
+dotenv.config()
+
+const LEDGER_ACCOUNTS: string[] = process.env.LEDGER_ACCOUNT ? [process.env.LEDGER_ACCOUNT] : []
+const ACCOUNT_PRVKEYS: string[] = process.env.PRIVATE_KEY    ? [process.env.PRIVATE_KEY   ] : []
+const DEPLOY_AUTH: string = process.env.DEPLOY_AUTH || zeroAddress
+const REDEPLOY_PROTECTION: string = process.env.REDEPLOY_PROTECTION === 'true' ? `01` : `00`
+const ENTROPY: string = process.env.ENTROPY || `0000000000000000000009`
+const SALT: string = `${DEPLOY_AUTH}${REDEPLOY_PROTECTION}${ENTROPY}`
+
+const HARDHAT_NETWORK_CONFIG: HardhatNetworkUserConfig = {
+  chainId: 1337,
+  ledgerAccounts: LEDGER_ACCOUNTS,
+  forking: {
+    url: process.env.MAINNET_URL || '',
+    blockNumber: 20726723
+  },
+}
+
+const config: HardhatUserConfig = {
+  solidity: {
+    version: '0.8.24',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1_000,
+      },
+    },
+  },
+  networks: {
+    mainnet: {
+      url: process.env.MAINNET_URL || "",
+      accounts: ACCOUNT_PRVKEYS,
+      ledgerAccounts: LEDGER_ACCOUNTS,
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_URL || "",
+      accounts: ACCOUNT_PRVKEYS,
+      ledgerAccounts: LEDGER_ACCOUNTS,
+    },
+    holesky: {
+      url: process.env.HOLESKY_URL || "",
+      accounts: ACCOUNT_PRVKEYS,
+      ledgerAccounts: LEDGER_ACCOUNTS,
+    },
+    localhost: {
+      ...HARDHAT_NETWORK_CONFIG,
+    },
+    hardhat: HARDHAT_NETWORK_CONFIG,
+  },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS === 'true',
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    currency: 'USD',
+    gasPrice: 10,
+  },
+  contractSizer: {
+    alphaSort: true,
+  },
+  ignition: {
+    strategyConfig: {
+      create2: {
+        salt: SALT,
+      },
+    },
+  }
+}
+
+export default config
+
+/**
 import "./tasks/accounts"
 import "./tasks/deploy"
 import "./tasks/mine"
@@ -63,4 +136,4 @@ const config = {
   },
 }
 
-export default config
+*/
