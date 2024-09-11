@@ -1,9 +1,9 @@
+import hre from 'hardhat'
 import { expect } from 'chai'
+import { encodeFunctionData, parseAbi, toHex } from 'viem'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenMetadataLinkFixture } from './fixtures'
 import { JALIL, VV } from '../helpers/constants'
-import hre from 'hardhat'
-import { encodeFunctionData, parseAbi, toBytes, toHex } from 'viem'
 
 describe('OpepenMetadataLink', function () {
   describe('contractURI', function () {
