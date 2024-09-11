@@ -12,8 +12,8 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
     uint8[6] public EDITION_SIZES = [40, 20, 10, 5, 4, 1];
 
-    // @dev We store 80 token categories in a single uint256;
-    //      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
+    /// @dev We store 80 token categories in a single uint256;
+    ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
     mapping(uint256 => uint256) private tokenEditions;
 
     /// @dev Default metadata URI for tokens
