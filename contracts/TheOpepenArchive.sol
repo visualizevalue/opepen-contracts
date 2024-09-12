@@ -17,11 +17,11 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     /// @notice Default metadata URI
     string public defaultMetadataURI;
 
-    /// @notice Mapping of custom metadata renderers by set id (0-200)
-    mapping(uint256 => address) public setMetadataRenderers;
-
     /// @notice Mapping of custom metadata renderer contracts by set id (0-200)
     mapping(uint256 => string) public setMetadataURIs;
+
+    /// @notice Mapping of custom metadata renderers by set id (0-200)
+    mapping(uint256 => address) public setMetadataRenderers;
 
     /// @dev We store 80 token categories in a single uint256;
     ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
@@ -66,23 +66,23 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
         return defaultMetadataURI;
     }
 
-    /// @notice Sets the default metadata URI for tokens
+    /// @notice Update the default metadata URI for tokens
     /// @param metadataURI The metadata URI to set
-    function setDefaultMetadataURI(string memory metadataURI) public requireSenderAdmin(EDITION) {
+    function updateDefaultMetadataURI(string memory metadataURI) public requireSenderAdmin(EDITION) {
         defaultMetadataURI = metadataURI;
     }
 
-    /// @notice Sets a custom metadata URI for a specific set
+    /// @notice Update a custom metadata URI for a specific set
     /// @param id The id of the set for which to store the metadata URI
     /// @param metadataURI The metadata URI to set
-    function setSetMetadataURI(uint256 id, string memory metadataURI) public requireSenderAdmin(EDITION) {
+    function updateSetMetadataURI(uint256 id, string memory metadataURI) public requireSenderAdmin(EDITION) {
         setMetadataURIs[id] = metadataURI;
     }
 
-    /// @notice Sets a custom metadata renderer for a specific set
+    /// @notice Update a custom metadata renderer for a specific set
     /// @param id The id of the set for which to store the metadata URI
     /// @param renderer The renderer contract address to set
-    function setSetMetadataRenderer(uint256 id, address renderer) public requireSenderAdmin(EDITION) {
+    function updateSetMetadataRenderer(uint256 id, address renderer) public requireSenderAdmin(EDITION) {
         setMetadataRenderers[id] = renderer;
     }
 
