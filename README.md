@@ -18,7 +18,9 @@ Further, we need to resolve the set for each token onchain.
 - We can fit 32 sets in one storage slot.
 - We batch store the token ID -> set in 500 groups of 32.
 
-The Opepen Archive has to be able to register custom renderers per set, or a custom metadata URI (e.g. to permanently store individual sets on IPFS).
+TheOpepenArchive.sol has to be able to register custom renderers per set, or a custom metadata URI (e.g. to permanently store individual sets on IPFS).
+
+The OpepenMetadataRenderer.sol implements the necessary interfaces to make it work as a drop in replacement for the Zora renderer. It queries `TheOpepenArchive.sol` for individual token metadata URIs.
 
 ## Working with Hardhat
 
@@ -31,11 +33,19 @@ npx hardhat accounts # or the shorthand via `hh accounts`
 npx hardhat compile
 npx hardhat clean
 npx hardhat test
-npx hardhat node
 npx hardhat help
 ```
 
 ## Deploying contracts
 
-We use Ignition for contract deployments.
+We use [Ignition](https://hardhat.org/ignition/docs/getting-started#overview) for contract deployments.
 
+```bash
+hh node # start a local node
+
+hh ignition deploy ./ignition/modules/TheOpepenArchive.ts --network localhost # deploy the opepen archive contract
+
+hh ignition deploy ./ignition/modules/TheOpepenArchiveTokenEditions.ts --network localhost # batch save token editions
+```
+```
+```
