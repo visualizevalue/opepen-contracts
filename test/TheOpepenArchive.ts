@@ -1,3 +1,4 @@
+import hre from 'hardhat'
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenArchiveFixture, opepenArchiveSavedEditionsFixture } from './fixtures'
@@ -142,15 +143,16 @@ describe('TheOpepenArchive', function () {
       expect(await contract.read.setMetadataRenderers([ 1n ])).to.equal('0x000000000000000000000000000000000000dEaD')
     })
 
-    it.skip('should return the set renderer tokenURI value if the renderer is set', async function () {
+    it('should return the set renderer tokenURI value if the renderer is set', async function () {
       const { contract } = await loadFixture(opepenArchiveSavedEditionsFixture)
 
-      await contract.write.updateSetMetadataRenderer([ 1n, '0x000000000000000000000000000000000000dEaD' ], { account: VV })
+      const mockRenderer = await hre.viem.deployContract('Set1RendererMock');
+
+      await contract.write.updateSetMetadataRenderer([ 1n, mockRenderer.address ], { account: VV })
 
       await contract.write.batchSaveTokenSets(prepareTokenSetsDataForSet(1), { account: VV })
 
-      // TODO: Implement Mock
-      expect(await contract.read.getTokenMetadataURI([ 70n ])).to.equal('hello-opepen') // token 70 is part of set 1
+      expect(await contract.read.getTokenMetadataURI([ 70n ])).to.equal('hello-opepen-set-1') // token 70 is part of set 1
     })
 
     it('should not allow anyone but the owner to update the metadata URI', async function () {
