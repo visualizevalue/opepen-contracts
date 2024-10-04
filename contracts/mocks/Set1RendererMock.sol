@@ -10,7 +10,7 @@ contract Set1RendererMock is IOpepenSetMetadataRenderer {
     address public constant artist      = 0xD1295FcBAf56BF1a6DFF3e1DF7e437f987f6feCa;
     string  public constant description = "The Original Opepen.";
 
-    function tokenURI(uint256) external pure returns (string memory) {
+    function tokenURI(uint256, uint8) external pure returns (string memory) {
         return "hello-opepen-set-1";
     }
 

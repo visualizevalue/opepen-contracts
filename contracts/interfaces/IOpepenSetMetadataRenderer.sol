@@ -6,5 +6,5 @@ interface IOpepenSetMetadataRenderer {
     function name() external view returns (string memory);
     function description() external view returns (string memory);
     function artist() external view returns (address);
-    function tokenURI(uint256) external view returns (string memory);
+    function tokenURI(uint256 tokenId, uint8 tokenEdition) external view returns (string memory);
 }

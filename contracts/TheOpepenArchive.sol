@@ -28,11 +28,11 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
     mapping(uint256 => uint256) private tokenEditions;
 
     /// @dev Mapping from packed token IDs to their corresponding set ID
-    //       We store 32 token sets in a single uint256 (8 bit per set fits 32)
+    ///      We store 32 token sets in a single uint256 (8 bit per set fits 32)
     mapping(uint256 => uint256) private tokenSets;
 
     /// @notice Get the edition size for a token
-    function getTokenEdition(uint256 tokenID) external view returns (uint8) {
+    function getTokenEdition(uint256 tokenID) public view returns (uint8) {
         uint256 groupIndex = (tokenID - 1) / 80;
         uint8 bitPosition = uint8(((tokenID - 1) % 80) * 3);
 
@@ -55,7 +55,7 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
 
         address setRenderer = setMetadataRenderers[set];
         if (setRenderer != address(0)) {
-            return IOpepenSetMetadataRenderer(setRenderer).tokenURI(tokenID);
+            return IOpepenSetMetadataRenderer(setRenderer).tokenURI(tokenID, getTokenEdition(tokenID));
         }
 
         string memory setMetadataURI = setMetadataURIs[set];
