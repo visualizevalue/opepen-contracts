@@ -1,35 +1,80 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "./interfaces/IOpepenSetMetadataRenderer.sol";
-import "./MetadataRenderAdminCheck.sol";
+import "./libraries/SSTORE2.sol";
+import "./types/Reveal.sol";
+import "./types/SetData.sol";
+import "./SetManager.sol";
 
 /// @title The Opepen Archive Contract
 /// @author VisualizeValue
-/// @notice Manages Metadata for Opepens
-contract TheOpepenArchive is MetadataRenderAdminCheck {
-    /// @notice The Opepen Edition address
-    address public constant EDITION = 0x6339e5E072086621540D0362C4e3Cea0d643E114;
-
+/// @notice Manages Metadata for Opepen
+contract TheOpepenArchive is SetManager {
     /// @notice There are six different edition sizes in the Opepen Edition
     uint8[6] public EDITION_SIZES = [40, 20, 10, 5, 4, 1];
 
-    /// @notice Default metadata URI
-    string public defaultMetadataURI;
-
-    /// @notice Mapping of custom metadata renderer contracts by set id (0-200)
-    mapping(uint256 => string) public setMetadataURIs;
-
-    /// @notice Mapping of custom metadata renderers by set id (0-200)
-    mapping(uint256 => address) public setMetadataRenderers;
+    /// @notice The collection description
+    string public description = "Consensus is temporary.";
 
     /// @dev We store 80 token categories in a single uint256;
-    ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types)
+    ///      Each category takes 3 bits (we use decimals 0-5 to identify the six different edition types).
     mapping(uint256 => uint256) private tokenEditions;
 
-    /// @dev Mapping from packed token IDs to their corresponding set ID
-    ///      We store 32 token sets in a single uint256 (8 bit per set fits 32)
+    /// @dev Mapping from packed token IDs to their corresponding set ID;
+    ///      We store 32 token sets in a single uint256 (8 bit per set fits 32).
     mapping(uint256 => uint256) private tokenSets;
+
+    /// @dev Mapping from packed token IDs to their corresponding set edition id;
+    ///      We can fit 42 set edition keys (0-39) into a uint256 (6 bit per id).
+    mapping(uint256 => uint256) private tokenSetEditionIds;
+
+    /// @dev Keeps track of the SSTORE2 bags per set.
+    mapping(uint256 => address[]) private setData;
+
+    /// @dev Stores reveal data for each set.
+    mapping(uint256 => Reveal) private setRevealData;
+
+    /// @notice Mapping of custom metadata renderers by set id (0-200).
+    mapping(uint256 => address) public setArtifactRenderer;
+
+    /// @dev Whether a set is locked (immutable).
+    mapping(uint256 => bool) public setLocked;
+
+    /// @dev Thrown when trying to update a locked set.
+    error SetIsLocked();
+
+    /// @dev Thrown when trying to update previously published reveal data.
+    error RevealDataPublished();
+
+    /// @dev Emitted when a collector mints a token.
+    event SetLocked(uint256 indexed set);
+
+    /// @notice Get the reveal block and input proof for a given set;
+    ///         The proof refers to an identifier for all opt in data.
+    function getSetRevealData (uint256 set) external view returns (uint32 blockHeight, uint224 proof) {
+        return (setRevealData[set].blockHeight, setRevealData[set].proof);
+    }
+
+    /// @notice Publish reveal block and input proof for a given set.
+    ///         The proof refers to an identifier for all opt in data.
+    function publishSetRevealData (uint256 set, uint32 blockHeight, uint224 proof) external onlyManager {
+        if (setRevealData[set].blockHeight > 0) revert RevealDataPublished();
+
+        setRevealData[set].blockHeight = blockHeight;
+        setRevealData[set].proof = proof;
+    }
+
+    /// @notice Gather and decode the data for a given set.
+    function getSetData (uint256 set) external view returns (SetData memory) {
+        // Read set data from storage
+        bytes memory data;
+        for (uint8 i = 0; i < setData[set].length; i++) {
+            data = abi.encodePacked(data, SSTORE2.read(setData[set][i]));
+        }
+
+        // Decode set data
+        return abi.decode(data, (SetData));
+    }
 
     /// @notice Get the edition size for a token
     function getTokenEdition(uint256 tokenID) public view returns (uint8) {
@@ -48,59 +93,78 @@ contract TheOpepenArchive is MetadataRenderAdminCheck {
         return uint8((packedSetIds >> (tokenPosition * 8)) & 255);
     }
 
-    /// @notice Get the metadataURI for a specific token
-    /// @param tokenID The token id for which to fetch the metadata uri
-    function getTokenMetadataURI(uint256 tokenID) public view returns (string memory) {
-        uint8 set = getTokenSet(tokenID);
+    /// @notice Get the set for a token
+    function getTokenSetEditionId(uint256 tokenID) public view returns (uint8) {
+        uint256 tokenGroup = (tokenID - 1) / 42;
+        uint256 tokenPosition = (tokenID - 1) % 42;
+        uint256 packedSetEditionIds = tokenSetEditionIds[tokenGroup];
+        return uint8((packedSetEditionIds >> (tokenPosition * 6)) & 63);
+    }
 
-        address setRenderer = setMetadataRenderers[set];
-        if (setRenderer != address(0)) {
-            return IOpepenSetMetadataRenderer(setRenderer).tokenURI(tokenID, getTokenEdition(tokenID));
+    /// @notice Admin function to update the collection description
+    function updateDescription(string memory newDescription) external onlyManager {
+        description = newDescription;
+    }
+
+    /// @notice Update the encoded data for a given set.
+    function updateSetData (uint256 set, bytes[] calldata data) external onlyManager {
+        if (setLocked[set]) revert SetIsLocked();
+
+        // Clear set data
+        if (setData[set].length > 0) {
+            delete setData[set];
         }
 
-        string memory setMetadataURI = setMetadataURIs[set];
-        if (bytes(setMetadataURI).length > 0) {
-            return setMetadataURI;
+        // Write the contract image to storage.
+        for (uint8 i = 0; i < data.length; i++) {
+            setData[set].push(SSTORE2.write(data[i]));
+        }
+    }
+
+    /// @notice Update a custom artifact renderer for a specific set
+    function updateSetArtifactRenderer(uint256 id, address renderer) public onlyManager {
+        setArtifactRenderer[id] = renderer;
+    }
+
+    /// @notice Locks the given set to make it immutable.
+    function lockSet (uint256 set) external onlyManager {
+        if (setLocked[set]) revert SetIsLocked();
+
+        setLocked[set] = true;
+
+        emit SetLocked(set);
+    }
+
+    /// @notice Batch save token sets and edition indices
+    function batchSaveTokenSets(
+        uint256[] calldata groupIndices,
+        uint256[] calldata sets,
+        uint256[] calldata editionGroupIndices,
+        uint256[] calldata editionIds
+    ) external onlyManager {
+        require(
+            groupIndices.length == sets.length &&
+            editionGroupIndices.length == editionIds.length,
+            "Input array length mismatch."
+        );
+
+        // Store which set a token belongs to
+        for (uint256 i = 0; i < groupIndices.length; i++) {
+            tokenSets[groupIndices[i]] = sets[i];
         }
 
-        return defaultMetadataURI;
-    }
-
-    /// @notice Update the default metadata URI for tokens
-    /// @param metadataURI The metadata URI to set
-    function updateDefaultMetadataURI(string memory metadataURI) public requireSenderAdmin(EDITION) {
-        defaultMetadataURI = metadataURI;
-    }
-
-    /// @notice Update a custom metadata URI for a specific set
-    /// @param id The id of the set for which to store the metadata URI
-    /// @param metadataURI The metadata URI to set
-    function updateSetMetadataURI(uint256 id, string memory metadataURI) public requireSenderAdmin(EDITION) {
-        setMetadataURIs[id] = metadataURI;
-    }
-
-    /// @notice Update a custom metadata renderer for a specific set
-    /// @param id The id of the set for which to store the metadata URI
-    /// @param renderer The renderer contract address to set
-    function updateSetMetadataRenderer(uint256 id, address renderer) public requireSenderAdmin(EDITION) {
-        setMetadataRenderers[id] = renderer;
+        // Store which edition index id a token has
+        for (uint256 i = 0; i < editionGroupIndices.length; i++) {
+            tokenSetEditionIds[editionGroupIndices[i]] = editionIds[i];
+        }
     }
 
     /// @notice Batch save token edition sizes
-    function batchSaveTokenEditions(uint256[] calldata groupIndices, uint256[] calldata editions) external requireSenderAdmin(EDITION) {
+    function batchSaveTokenEditions(uint256[] calldata groupIndices, uint256[] calldata editions) external onlyManager {
         require(groupIndices.length == editions.length, "Input array length mismatch.");
 
         for (uint256 i = 0; i < groupIndices.length; i++) {
             tokenEditions[groupIndices[i]] = editions[i];
-        }
-    }
-
-    /// @notice Batch save token sets
-    function batchSaveTokenSets(uint256[] calldata groupIndices, uint256[] calldata sets) external requireSenderAdmin(EDITION) {
-        require(groupIndices.length == sets.length, "Input array length mismatch.");
-
-        for (uint256 i = 0; i < groupIndices.length; i++) {
-            tokenSets[groupIndices[i]] = sets[i];
         }
     }
 }

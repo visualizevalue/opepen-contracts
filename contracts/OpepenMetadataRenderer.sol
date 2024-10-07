@@ -1,73 +1,136 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { IERC721Drop } from "./interfaces/IERC721Drop.sol";
-import { IMetadataRenderer } from "./interfaces/IMetadataRenderer.sol";
-import { NFTMetadataRenderer } from "./libraries/NFTMetadataRenderer.sol";
-import { MetadataRenderAdminCheck } from "./MetadataRenderAdminCheck.sol";
-import { TheOpepenArchive } from "./TheOpepenArchive.sol";
+import { Base64                     } from "@openzeppelin/contracts/utils/Base64.sol";
+import { Strings                    } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IERC721Drop                } from "./interfaces/IERC721Drop.sol";
+import { IMetadataRenderer          } from "./interfaces/IMetadataRenderer.sol";
+import { ISetArtifactRenderer       } from "./interfaces/ISetArtifactRenderer.sol";
+import { NFTMetadataRenderer        } from "./libraries/NFTMetadataRenderer.sol";
+import { SetData                    } from "./types/SetData.sol";
+import { MetadataRenderAdminCheck   } from "./MetadataRenderAdminCheck.sol";
+import { TheOpepenArchive           } from "./TheOpepenArchive.sol";
 
+/// @title  Opepen Metadata Renderer
+/// @author VisualizeValue
+/// @notice Renders Metadata for Opepen
 contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
-    /// @notice The Opepen Edition address
-    address public edition = 0x6339e5E072086621540D0362C4e3Cea0d643E114;
-
     /// @notice The Opepen Archive address
-    address public archive;
-
-    /// @notice The collection description
-    string public description = "O";
-
-    /// @notice Description updated for this edition
-    /// @dev admin function indexer feedback
-    event DescriptionUpdated(
-        address indexed target,
-        address sender,
-        string newDescription
-    );
+    TheOpepenArchive public archive;
 
     constructor (address archive_) {
-        archive = archive_;
-    }
-
-    /// @notice Admin function to update description
-    /// @param newDescription new description
-    function updateDescription(string memory newDescription)
-        external
-        requireSenderAdmin(edition)
-    {
-        description = newDescription;
-
-        emit DescriptionUpdated({
-            target: edition,
-            sender: msg.sender,
-            newDescription: newDescription
-        });
+        archive = TheOpepenArchive(archive_);
     }
 
     /// @notice Contract URI information getter
     /// @return contract uri (if set)
     function contractURI() external view override returns (string memory) {
-        return
-            NFTMetadataRenderer.encodeContractURIJSON({
-                name: "Opepen",
-                description: description,
-                imageURI: "",
-                animationURI: "",
-                royaltyBPS: 0,
-                royaltyRecipient: address(0)
-            });
+        bytes memory dataURI = abi.encodePacked('{'
+            '"name": "Opepen",'
+            '"description": "', archive.description, '",'
+            '"image": "ipfs://bafybeidhmw3gazojgwqieyhj2ace23qdyt3frmirt4pe25jgzn4veeza3q"'
+        '}');
+
+        return string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(dataURI)
+            )
+        );
+    }
+
+    function tokenName (
+        uint256 id,
+        uint8 tokenSet,
+        uint8 tokenEdition,
+        SetData memory setData
+    ) internal pure returns (string memory) {
+        return tokenSet > 0
+            ? setData.name
+            : string(abi.encodePacked(
+                'Unrevealed, 1/', Strings.toString(tokenEdition), ' '
+                '(#', id, ')'
+            ));
+    }
+
+    function renderTokenEdition (uint8 tokenEdition) internal pure returns (string memory) {
+        return tokenEdition ==  1 ? 'One'
+             : tokenEdition ==  4 ? 'Four'
+             : tokenEdition ==  5 ? 'Five'
+             : tokenEdition == 10 ? 'Ten'
+             : tokenEdition == 20 ? 'Twenty'
+                                  : 'Forty';
+    }
+
+    function renderRevealed (uint8 tokenSet) internal pure returns (string memory) {
+        return tokenSet > 0 ? 'Yes' : 'No';
+    }
+
+    function renderArtifact(
+        uint256 id,
+        uint8 tokenEdition,
+        uint8 tokenSetEditionIndex,
+        SetData memory setData
+    ) internal view returns (bytes memory) {
+        address artifactRendererAddress = archive.setArtifactRenderer(id);
+        ISetArtifactRenderer artifactRenderer = ISetArtifactRenderer(artifactRendererAddress);
+
+        string memory image = artifactRendererAddress != address(0)
+            ? artifactRenderer.imageUrl(id, tokenEdition, tokenSetEditionIndex)
+            : string(abi.encodePacked("ipfs://", setData.imageCid));
+
+        string memory animationUrl = artifactRendererAddress != address(0)
+            ? artifactRenderer.animationUrl(id, tokenEdition, tokenSetEditionIndex)
+            : string(abi.encodePacked("ipfs://", setData.animationCid));
+
+        return abi.encodePacked(
+            '"image": "', image, '",',
+            bytes(animationUrl).length > 0
+                ? string(abi.encodePacked('"animation_url": "', animationUrl, '",'))
+                : ''
+        );
     }
 
     /// @notice Token URI information getter
-    /// @param tokenId to get uri for
+    /// @param id to get uri for
     /// @return contract uri (if set)
-    function tokenURI(uint256 tokenId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return TheOpepenArchive(archive).getTokenMetadataURI(tokenId);
+    function tokenURI(uint256 id) external view returns (string memory) {
+        // Gather data
+        uint8 tokenSet             = archive.getTokenSet(id);
+        uint8 tokenSetEditionIndex = archive.getTokenSetEditionId(id);
+        uint8 tokenEdition         = archive.getTokenEdition(id);
+        SetData memory setData     = archive.getSetData(id);
+
+        // Transform data
+        string memory tokenId = Strings.toString(id);
+
+        bytes memory dataURI = abi.encodePacked('{'
+            '"id": "', tokenId, '",'
+            '"name": "', tokenName(id, tokenSet, tokenEdition, setData), '",'
+            '"description": "', archive.description, '",',
+            renderArtifact(id, tokenEdition, tokenSetEditionIndex, setData),
+            '"attributes": ['
+                '{'
+                    '"trait_type": "Edition Size",'
+                    '"value": "', renderTokenEdition(tokenEdition), '"'
+                '},'
+                '{'
+                    '"trait_type": "Revealed",'
+                    '"value": "', renderRevealed(tokenSet), '"'
+                '},'
+                '{'
+                    '"trait_type": "Number",'
+                    '"value": ', tokenId,
+                '},'
+            ']'
+        '}');
+
+        return string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(dataURI)
+            )
+        );
     }
 
     /// @dev We don't need to do anything in here, as we don't hold this data onchain.

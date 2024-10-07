@@ -3,53 +3,27 @@ pragma solidity ^0.8.24;
 
 import { Strings   } from "@openzeppelin/contracts/utils/Strings.sol";
 import { Base64    } from "@openzeppelin/contracts/utils/Base64.sol";
-import "../interfaces/IOpepenSetMetadataRenderer.sol";
+import "../interfaces/ISetArtifactRenderer.sol";
 import "./checks/libraries/ChecksArt.sol";
 import "./checks/libraries/EightyColors.sol";
 
-contract Set001Renderer is IOpepenSetMetadataRenderer {
-    function id() external pure returns (uint8) {
-        return 1;
+contract Set001Renderer is ISetArtifactRenderer {
+
+    function imageUrl(uint256 id, uint8 edition, uint8 editionIndex) external view returns (string memory) {
+        return string(abi.encodePacked(
+            'data:image/svg+xml;base64,',
+            Base64.encode(generateSVG(id, edition, editionIndex))
+        ));
     }
 
-    function name() external pure returns (string memory) {
-        return unicode"8×8";
-    }
-
-    function description() external pure returns (string memory) {
-        return "The Original Opepen";
-    }
-
-    function artist() external pure returns (address) {
-        return 0xD1295FcBAf56BF1a6DFF3e1DF7e437f987f6feCa;
-    }
-
-    function tokenURI(uint256 tokenId, uint8 tokenEdition) external view returns (string memory) {
-        bytes memory dataURI = abi.encodePacked(
-            '{',
-                '"id": "', Strings.toString(tokenId), '",',
-                '"name": "', token.name, '",',
-                '"description": "', token.description, '",',
-                '"image": "', artifact, '"',
-            '}'
-        );
-
-        return string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(dataURI)
-            )
-        );
-    }
-
-    function generateSVG(uint256 tokenId, uint8 tokenEdition) external view returns (string memory) {
+    function generateSVG(uint256, uint8, uint8) public pure returns (bytes memory) {
         string[16] memory colors;
 
         for (uint256 index = 0; index < 16; index++) {
             colors[index] = "green";
         }
 
-        return string(abi.encodePacked(
+        return abi.encodePacked(
             '<svg width="1400" height="1400" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">'
                 // Background
                 '<rect width="512" height="512" fill="#000" />'
@@ -85,7 +59,7 @@ contract Set001Renderer is IOpepenSetMetadataRenderer {
                     '</g>'
                 '</defs>'
             '</svg>'
-        ));
+        );
     }
 
     function generateParts(string[16] memory colors) internal pure returns (bytes memory) {
@@ -137,6 +111,10 @@ contract Set001Renderer is IOpepenSetMetadataRenderer {
                 '<use x="192" href="#1x1_tr" fill="', colors[15], '" />'
             '</g>'
         );
+    }
+
+    function animationUrl(uint256, uint8, uint8) external pure returns (string memory) {
+        return "";
     }
 
 }
