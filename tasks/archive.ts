@@ -4,6 +4,7 @@ import { task } from 'hardhat/config'
 import edionSizes from './../data/token-edition.json'
 import editionIndices from './../data/token-edition-index.json'
 import tokenSets from './../data/token-sets.json'
+import tokenSetEditionIds from './../data/token-set-edition-ids.json'
 
 interface KeyedNumbers {
   [tokenId: string]: number
@@ -11,6 +12,7 @@ interface KeyedNumbers {
 interface TokenEditions extends KeyedNumbers {}
 interface TokenEditionIndices extends KeyedNumbers {}
 interface TokenSets extends KeyedNumbers {}
+interface TokenSetEditionIds extends KeyedNumbers {}
 
 const EDITION_MAP: TokenEditionIndices = {
   '40': 0,
@@ -81,5 +83,30 @@ task('archive:pack-sets', 'Pack token <> sets data', async () => {
   }
 
   fs.writeFileSync(path.resolve(__dirname, '../data/token-packed-sets.json'), JSON.stringify(packedSets, null, 4))
+})
+
+task('archive:pack-set-edition-ids', 'Pack token <> set edition ids data', async () => {
+  const packSets = (sets: number[]): bigint => sets.reduce(
+    (packed, set, i) => packed | (BigInt(set) << BigInt(i * 6)),
+    0n
+  )
+
+  const data: TokenSetEditionIds = tokenSetEditionIds
+  const packedSetEditionIds: string[] = []
+
+  for (let groupIndex = 0; groupIndex < 400; groupIndex++) {
+    const currentSetEditionIds: number[] = []
+    for (let tokenId = groupIndex * 40 + 1; tokenId <= (groupIndex + 1) * 40; tokenId++) {
+      const editionId = data[tokenId.toString()]
+      if (editionId === undefined) throw new Error(`Undefined set edition id for ${tokenId}`)
+      currentSetEditionIds.push(editionId)
+    }
+
+    const packed = packSets(currentSetEditionIds)
+
+    packedSetEditionIds.push(packed.toString())
+  }
+
+  fs.writeFileSync(path.resolve(__dirname, '../data/token-packed-set-edition-ids.json'), JSON.stringify(packedSetEditionIds, null, 4))
 })
 

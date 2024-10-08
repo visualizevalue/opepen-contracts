@@ -95,8 +95,8 @@ contract TheOpepenArchive is SetManager {
 
     /// @notice Get the set for a token
     function getTokenSetEditionId(uint256 tokenID) public view returns (uint8) {
-        uint256 tokenGroup = (tokenID - 1) / 42;
-        uint256 tokenPosition = (tokenID - 1) % 42;
+        uint256 tokenGroup = (tokenID - 1) / 40;
+        uint256 tokenPosition = (tokenID - 1) % 40;
         uint256 packedSetEditionIds = tokenSetEditionIds[tokenGroup];
         return uint8((packedSetEditionIds >> (tokenPosition * 6)) & 63);
     }
