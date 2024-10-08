@@ -46,6 +46,8 @@ export async function opepenArchiveFixture() {
 
   const contract = await hre.viem.getContractAt('TheOpepenArchive', archive.address)
 
+  await contract.write.updateManager([VV], { account: VV })
+
   return {
     contract,
     owner,
