@@ -3,9 +3,10 @@ import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenArchiveFixture, opepenArchiveSavedEditionsFixture } from './fixtures'
 import { prepareTokenSetsAndEditionsInput, prepareTokenSetsAndEditionsInputForSet } from '../helpers/token-sets'
+import { prepareSetData } from '../helpers/set-data'
 import { JALIL, VV } from '../helpers/constants'
 
-describe.only('TheOpepenArchive', function () {
+describe('TheOpepenArchive', function () {
   describe('Token Editions', function () {
     it('should store the editions for each token', async function () {
       const { contract } = await loadFixture(opepenArchiveSavedEditionsFixture)
@@ -30,7 +31,9 @@ describe.only('TheOpepenArchive', function () {
     it('should allow storing the sets for tokens', async function () {
       const { contract } = await loadFixture(opepenArchiveFixture)
 
-      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInput(), { account: VV })
+      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInput())
+
+      expect(await contract.read.getTokenSet([1n])).to.equal(0)
 
       expect(await contract.read.getTokenSet([7n])).to.equal(30)
       expect(await contract.read.getTokenSet([20n])).to.equal(49)
@@ -55,7 +58,7 @@ describe.only('TheOpepenArchive', function () {
     it('should allow storing a single set for tokens', async function () {
       const { contract } = await loadFixture(opepenArchiveFixture)
 
-      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(1), { account: VV })
+      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(1))
 
       expect(await contract.read.getTokenSet([70n])).to.equal(1)
 
@@ -63,7 +66,7 @@ describe.only('TheOpepenArchive', function () {
       expect(await contract.read.getTokenSet([4036n])).to.equal(1)
       expect(await contract.read.getTokenSet([15446n])).to.equal(1)
 
-      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(2), { account: VV })
+      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(2))
 
       expect(await contract.read.getTokenSet([100n])).to.equal(2)
     })
@@ -73,14 +76,14 @@ describe.only('TheOpepenArchive', function () {
     it('should allow setting the set renderer', async function () {
       const { contract } = await loadFixture(opepenArchiveSavedEditionsFixture)
 
-      await expect(contract.write.updateSetArtifactRenderer([ 1n, '0x000000000000000000000000000000000000dEaD' ], { account: VV }))
+      await expect(contract.write.updateSetArtifactRenderer([ 1n, '0x000000000000000000000000000000000000dEaD' ]))
         .not.to.be.reverted
     })
 
     it('should expose the set renderer', async function () {
       const { contract } = await loadFixture(opepenArchiveSavedEditionsFixture)
 
-      await contract.write.updateSetArtifactRenderer([ 1n, '0x000000000000000000000000000000000000dEaD' ], { account: VV })
+      await contract.write.updateSetArtifactRenderer([ 1n, '0x000000000000000000000000000000000000dEaD' ])
 
       expect(await contract.read.setArtifactRenderer([ 1n ])).to.equal('0x000000000000000000000000000000000000dEaD')
     })
@@ -90,9 +93,9 @@ describe.only('TheOpepenArchive', function () {
 
       const mockRenderer = await hre.viem.deployContract('Set1RendererMock');
 
-      await contract.write.updateSetArtifactRenderer([ 1n, mockRenderer.address ], { account: VV })
+      await contract.write.updateSetArtifactRenderer([ 1n, mockRenderer.address ])
 
-      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(1), { account: VV })
+      await contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInputForSet(1))
 
       // expect(await contract.read.getTokenMetadataURI([ 70n ])).to.equal('hello-opepen-set-1') // token 70 is part of set 1
     })
@@ -108,10 +111,10 @@ describe.only('TheOpepenArchive', function () {
   describe('Publishing Set Reveal Data', function () {
     it('should allow publishing set reveal data', async function () {
       const { contract } = await loadFixture(opepenArchiveFixture)
-      await expect(contract.write.publishSetRevealData([ 1n, 100, 111n ]))
+      await expect(contract.write.publishSetRevealData([ 1n, 100, 111n ], { account: VV }))
         .to.be.revertedWithCustomError(contract, 'ManagerUnauthorizedAccount')
 
-      await expect(contract.write.publishSetRevealData([ 1n, 100, 111n ], { account: VV }))
+      await expect(contract.write.publishSetRevealData([ 1n, 100, 111n ]))
         .not.to.be.reverted
 
       const [ block, proof ] = await contract.read.getSetRevealData([ 1n ])
@@ -122,10 +125,59 @@ describe.only('TheOpepenArchive', function () {
     it('should preven re-publishing set reveal data', async function () {
       const { contract } = await loadFixture(opepenArchiveFixture)
 
-      await contract.write.publishSetRevealData([ 1n, 100, 111n ], { account: VV })
+      await contract.write.publishSetRevealData([ 1n, 100, 111n ])
 
-      await expect(contract.write.publishSetRevealData([ 1n, 101, 999n ], { account: VV }))
+      await expect(contract.write.publishSetRevealData([ 1n, 101, 999n ]))
         .to.be.revertedWithCustomError(contract, 'RevealDataPublished')
+    })
+  })
+
+  describe('Set Data', function () {
+    it('allows fetching empty set data', async function () {
+      const { contract } = await loadFixture(opepenArchiveFixture)
+
+      const setData = await contract.read.getSetData([ 1n ])
+
+      expect(setData).to.deep.equal({
+        name: '',
+        description: '',
+        artist: '',
+        editionOne: '',
+        editionFour: '',
+        editionFive: '',
+        editionTen: '',
+        editionTwenty: '',
+        editionForty: '',
+        imageCid: '',
+        animationCid: '',
+      })
+    })
+
+    it('allows storing set data', async function () {
+      const { contract } = await loadFixture(opepenArchiveFixture)
+
+      const data = {
+        name: '8x8',
+        description: 'The Original Opepen',
+        artist: 'Jack Butcher',
+        editionOne: 'XVI',
+        editionFour: 'XII',
+        editionFive: 'IX',
+        editionTen: 'V',
+        editionTwenty: 'III',
+        editionForty: 'I',
+        imageCid: '',
+        animationCid: '',
+      }
+
+      await contract.write.updateSetData([
+        1n,
+        prepareSetData(data)
+      ])
+
+      const setData = await contract.read.getSetData([ 1n ])
+
+      expect(setData).to.deep.equal(data)
     })
   })
 
@@ -139,7 +191,7 @@ describe.only('TheOpepenArchive', function () {
     it('should allow locking sets', async function () {
       const { contract } = await loadFixture(opepenArchiveFixture)
 
-      await expect(contract.write.lockSet([ 1n ], { account: VV }))
+      await expect(contract.write.lockSet([ 1n ]))
         .to.emit(contract, 'SetLocked')
         .withArgs(1)
 
