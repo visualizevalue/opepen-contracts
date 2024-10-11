@@ -39,16 +39,28 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         );
     }
 
+    function paddedSetId (uint8 set) internal pure returns (string memory) {
+        string memory id = Strings.toString(set);
+
+        return set < 10
+            ? string(abi.encodePacked("00", id))
+            : set < 100
+            ? string(abi.encodePacked("0", id))
+            : id;
+    }
+
     function tokenName (
-        uint256 id,
+        string memory id,
         uint8 tokenSet,
-        uint8 tokenEdition,
-        SetData memory setData
+        uint8 tokenEdition
     ) internal pure returns (string memory) {
+        string memory edition = Strings.toString(tokenEdition);
         return tokenSet > 0
-            ? setData.name
+            ? string(abi.encodePacked(
+                'Set ', paddedSetId(tokenSet), ', 1/', edition, ' (#', id, ')'
+            ))
             : string(abi.encodePacked(
-                'Unrevealed, 1/', Strings.toString(tokenEdition), ' '
+                'Unrevealed, 1/', edition, ' '
                 '(#', id, ')'
             ));
     }
@@ -68,27 +80,96 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
 
     function renderArtifact(
         uint256 id,
+        uint8 tokenSet,
         uint8 tokenEdition,
         uint8 tokenSetEditionIndex,
         SetData memory setData
     ) internal view returns (bytes memory) {
-        address artifactRendererAddress = archive.setArtifactRenderer(id);
+        address artifactRendererAddress = archive.setArtifactRenderer(tokenSet);
         ISetArtifactRenderer artifactRenderer = ISetArtifactRenderer(artifactRendererAddress);
 
         string memory image = artifactRendererAddress != address(0)
             ? artifactRenderer.imageUrl(id, tokenEdition, tokenSetEditionIndex)
-            : string(abi.encodePacked("ipfs://", setData.imageCid));
+            : string(abi.encodePacked(
+                "ipfs://",
+                tokenSet <= 0
+                    // TODO: Render blank opepen onchain
+                    ? string(abi.encodePacked(
+                        'QmVXvZ5Sp6aSDBrWvtJ5gZ3bwNWRqqY3iPvyF8nveWj5HF/',
+                        Strings.toString(tokenEdition),
+                        '.png'
+                      ))
+                    : setData.imageCid
+            ));
 
-        string memory animationUrl = artifactRendererAddress != address(0)
+        bool hasAnimationCid = bytes(setData.animationCid).length > 0;
+        bool hasCustomRenderer = artifactRendererAddress != address(0);
+        string memory animationUrl = hasCustomRenderer
             ? artifactRenderer.animationUrl(id, tokenEdition, tokenSetEditionIndex)
             : string(abi.encodePacked("ipfs://", setData.animationCid));
+        bool hasAnimation = hasAnimationCid || (hasCustomRenderer && bytes(animationUrl).length > 0);
 
         return abi.encodePacked(
             '"image": "', image, '",',
-            bytes(animationUrl).length > 0
+            hasAnimation
                 ? string(abi.encodePacked('"animation_url": "', animationUrl, '",'))
                 : ''
         );
+    }
+
+    function renderTokenSetAttributes(
+        uint8 tokenSet,
+        uint8 tokenEdition,
+        SetData memory setData
+    ) internal view returns (string memory) {
+        return string(abi.encodePacked(
+            '{'
+                '"trait_type": "Release",'
+                '"value": "', paddedSetId(tokenSet), '"'
+            '},'
+            '{'
+                '"trait_type": "Set",'
+                '"value": "', setData.name, '"'
+            '},'
+            '{'
+                '"trait_type": "Artist",'
+                '"value": "', setData.artist, '"'
+            '},'
+            '{'
+                '"trait_type": "Opepen",'
+                '"value": "',
+                    tokenEdition == 1  ? setData.editionOne  :
+                    tokenEdition == 4  ? setData.editionFour :
+                    tokenEdition == 5  ? setData.editionFive :
+                    tokenEdition == 10 ? setData.editionTen  :
+                    tokenEdition == 20 ? setData.editionTwenty
+                                       : setData.editionForty,
+                '"'
+            '},'
+        ));
+    }
+
+    function renderTokenAttributes(
+        string memory tokenId,
+        uint8 tokenSet,
+        uint8 tokenEdition,
+        SetData memory setData
+    ) internal view returns (string memory) {
+        return string(abi.encodePacked(
+            '{'
+                '"trait_type": "Edition Size",'
+                '"value": "', renderTokenEdition(tokenEdition), '"'
+            '},'
+            '{'
+                '"trait_type": "Revealed",'
+                '"value": "', renderRevealed(tokenSet), '"'
+            '},',
+            tokenSet > 0 ? renderTokenSetAttributes(tokenSet, tokenEdition, setData) : '',
+            '{'
+                '"trait_type": "Number",'
+                '"value": ', tokenId,
+            '}'
+        ));
     }
 
     /// @notice Token URI information getter
@@ -99,29 +180,18 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         uint8 tokenSet             = archive.getTokenSet(id);
         uint8 tokenSetEditionIndex = archive.getTokenSetEditionId(id);
         uint8 tokenEdition         = archive.getTokenEdition(id);
-        SetData memory setData     = archive.getSetData(id);
+        SetData memory setData     = archive.getSetData(tokenSet);
 
         // Transform data
         string memory tokenId = Strings.toString(id);
 
         bytes memory dataURI = abi.encodePacked('{'
             '"id": "', tokenId, '",'
-            '"name": "', tokenName(id, tokenSet, tokenEdition, setData), '",'
-            '"description": "', archive.description, '",',
-            renderArtifact(id, tokenEdition, tokenSetEditionIndex, setData),
-            '"attributes": ['
-                '{'
-                    '"trait_type": "Edition Size",'
-                    '"value": "', renderTokenEdition(tokenEdition), '"'
-                '},'
-                '{'
-                    '"trait_type": "Revealed",'
-                    '"value": "', renderRevealed(tokenSet), '"'
-                '},'
-                '{'
-                    '"trait_type": "Number",'
-                    '"value": ', tokenId,
-                '},'
+            '"name": "', tokenName(tokenId, tokenSet, tokenEdition), '",'
+            '"description": "', archive.description(), '",',
+            renderArtifact(id, tokenSet, tokenEdition, tokenSetEditionIndex, setData),
+            '"attributes": [',
+                renderTokenAttributes(tokenId, tokenSet, tokenEdition, setData),
             ']'
         '}');
 

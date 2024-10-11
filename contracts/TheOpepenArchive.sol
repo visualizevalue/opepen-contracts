@@ -65,14 +65,17 @@ contract TheOpepenArchive is SetManager {
     }
 
     /// @notice Gather and decode the data for a given set.
-    function getSetData (uint256 set) external view returns (SetData memory) {
-        // Read set data from storage
+    function getSetData (uint256 set) public view returns (SetData memory) {
         bytes memory data;
+
+        // Read set data from storage
         for (uint8 i = 0; i < setData[set].length; i++) {
             data = abi.encodePacked(data, SSTORE2.read(setData[set][i]));
         }
 
-        // Decode set data
+        if (data.length == 0) return SetData('', '', '', '', '', '', '', '', '', '', '');
+
+        // Decode set data directly into the struct
         return abi.decode(data, (SetData));
     }
 
