@@ -65,12 +65,30 @@ export async function opepenArchiveSavedEditionsFixture() {
   const data = await loadFixture(opepenArchiveFixture)
 
   await data.contract.write.batchSaveTokenEditions(prepareTokenEditionsData())
+  await data.contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInput())
 
   return data
 }
 
-export async function opepenArchiveSetPublishedFixture() {
+export async function opepenMetadataRendererFixture() {
   const data = await loadFixture(opepenArchiveSavedEditionsFixture)
+
+  const { renderer } = await hre.ignition.deploy(OpepenMetadataRendererModule, {
+    parameters: {
+      OpepenMetadataRenderer: {
+        archive: data.contract.address,
+      },
+    },
+  })
+
+  return {
+    ...data,
+    renderer,
+  }
+}
+
+export async function opepenArchiveSetPublishedFixture() {
+  const data = await loadFixture(opepenMetadataRendererFixture)
 
   const setData = {
     name: '8x8',
@@ -91,27 +109,14 @@ export async function opepenArchiveSetPublishedFixture() {
     prepareSetData(setData)
   ])
 
-  const mockRenderer = await hre.viem.deployContract('Set1RendererMock');
+  const colors = await hre.viem.deployContract('EightyColors')
+  const mockRenderer = await hre.viem.deployContract('Set001Renderer', [], {
+    libraries: {
+      EightyColors: colors.address,
+    }
+  });
   await data.contract.write.updateSetArtifactRenderer([ 1n, mockRenderer.address ])
-
-  await data.contract.write.batchSaveTokenSets(prepareTokenSetsAndEditionsInput())
 
   return data
 }
 
-export async function opepenMetadataRendererFixture() {
-  const data = await loadFixture(opepenArchiveSetPublishedFixture)
-
-  const { renderer } = await hre.ignition.deploy(OpepenMetadataRendererModule, {
-    parameters: {
-      OpepenMetadataRenderer: {
-        archive: data.contract.address,
-      },
-    },
-  })
-
-  return {
-    ...data,
-    renderer,
-  }
-}

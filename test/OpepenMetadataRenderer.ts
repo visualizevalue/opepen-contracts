@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { opepenMetadataRendererFixture } from './fixtures'
+import { opepenArchiveSetPublishedFixture, opepenMetadataRendererFixture } from './fixtures'
+import { ENCODED_SET_001_1_1 } from '../helpers/set-data'
 
 describe('OpepenMetadataRenderer', function () {
 
@@ -40,7 +41,7 @@ describe('OpepenMetadataRenderer', function () {
   })
 
   it('should render metadata for revealed tokens', async function () {
-    const { renderer } = await loadFixture(opepenMetadataRendererFixture)
+    const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
 
     const dataURI = await renderer.read.tokenURI([ 151n ])
     const json = Buffer.from(dataURI.substring(29), `base64`).toString()
@@ -51,7 +52,7 @@ describe('OpepenMetadataRenderer', function () {
       "name": "Set 001, 1/1 (#151)",
       "description": "Consensus is temporary.",
       // TODO: Implement custom renderer
-      "image": "hello-opepen-set-1",
+      "image": ENCODED_SET_001_1_1,
       "attributes": [
         {
           "trait_type": "Edition Size",

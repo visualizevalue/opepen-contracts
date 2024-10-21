@@ -9,6 +9,15 @@ import "./checks/libraries/EightyColors.sol";
 
 contract Set001Renderer is ISetArtifactRenderer {
 
+    uint256 private constant ONE_OF_ONE_COLORS = 58158912268585443335777250615;
+
+    function getOneOfOneColors (uint256 index) public pure returns (string memory) {
+        string[80] memory colors = EightyColors.COLORS();
+        uint8 index = uint8((ONE_OF_ONE_COLORS >> (index * 6)) & 0x3F);
+
+        return string(abi.encodePacked('#', colors[index]));
+    }
+
     function imageUrl(uint256 id, uint8 edition, uint8 editionIndex) external view returns (string memory) {
         return string(abi.encodePacked(
             'data:image/svg+xml;base64,',
@@ -20,7 +29,7 @@ contract Set001Renderer is ISetArtifactRenderer {
         string[16] memory colors;
 
         for (uint256 index = 0; index < 16; index++) {
-            colors[index] = "green";
+            colors[index] = getOneOfOneColors(index);
         }
 
         return abi.encodePacked(
