@@ -55,23 +55,50 @@ contract Set001ColorStorage {
         ];
     }
 
-    function getColorIndex(uint8 arrayKey, uint256 position) internal view returns (uint8) {
-        uint256 wordIndex = position / NUMBERS_PER_UINT256;
-        uint256 bitPosition = (position % NUMBERS_PER_UINT256) * BITS_PER_NUMBER;
-        uint256[2] memory targetArray = getTargetArray(arrayKey);
-
-        return uint8((targetArray[wordIndex] >> bitPosition) & MASK);
-    }
-
     // Get an entire row
     function getColors(uint8 edition, uint8 editionIndex) public view returns (uint8[] memory) {
+        if (edition < 20) {
+            return getStoredColors(edition, editionIndex);
+        }
+        return getGenerativeColors(edition, editionIndex);
+    }
+
+    function getGenerativeColors(uint8 edition, uint8 editionIndex) internal view returns (uint8[] memory) {
+        uint8 increment = 80 / edition;
+        uint8 offset = (editionIndex - 1) * increment;
+
+        uint8[] memory result = new uint8[](16);
+        if (edition == 40) {
+            for (uint8 i = 0; i < 16; i++) {
+                result[i] = offset;
+            }
+        } else if (edition == 20) {
+            uint8 add = 5;
+
+            for (uint8 i = 0; i < 4; i++) {
+                result[i] = offset;
+            }
+
+            for (uint8 i = 0; i < 8; i++) {
+                result[i+4] = (offset + add) % 80;
+            }
+
+            for (uint8 i = 0; i < 4; i++) {
+                result[i+12] = (offset + add * 2) % 80;
+            }
+        }
+
+        return result;
+    }
+
+    function getStoredColors(uint8 edition, uint8 editionIndex) internal view returns (uint8[] memory) {
         uint8 numRows = edition;
         uint8 rowLength = getRowLength(edition);
         uint256 startPosition = uint256(editionIndex - 1) * uint256(rowLength);
 
         uint8[] memory colorBuffer = new uint8[](rowLength);
         for (uint8 i = 0; i < rowLength; i++) {
-            colorBuffer[i] = getColorIndex(edition, startPosition + i);
+            colorBuffer[i] = getStoredColorIndex(edition, startPosition + i);
         }
 
         if (edition == 1) {
@@ -98,6 +125,14 @@ contract Set001ColorStorage {
         }
 
         return result;
+    }
+
+    function getStoredColorIndex(uint8 arrayKey, uint256 position) internal view returns (uint8) {
+        uint256 wordIndex = position / NUMBERS_PER_UINT256;
+        uint256 bitPosition = (position % NUMBERS_PER_UINT256) * BITS_PER_NUMBER;
+        uint256[2] memory targetArray = getTargetArray(arrayKey);
+
+        return uint8((targetArray[wordIndex] >> bitPosition) & MASK);
     }
 
     // Helper functions

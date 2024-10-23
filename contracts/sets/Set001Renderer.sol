@@ -11,7 +11,7 @@ import "./Set001ColorStorage.sol";
 import "hardhat/console.sol";
 
 contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
-    function getColor (uint256 index) public view returns (string memory) {
+    function renderColor (uint256 index) public view returns (string memory) {
         string[80] memory colors = EightyColors.COLORS();
 
         return string(abi.encodePacked('#', colors[index]));
@@ -30,7 +30,7 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         string[16] memory colors;
 
         for (uint256 index = 0; index < 16; index++) {
-            colors[index] = getColor(editionColorIndexes[index]);
+            colors[index] = renderColor(editionColorIndexes[index]);
         }
 
         return abi.encodePacked(

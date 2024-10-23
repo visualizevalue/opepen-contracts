@@ -2,11 +2,24 @@ import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenArchiveSetPublishedFixture } from './fixtures'
 import {
+  ENCODED_SET_001_10_1,
+  ENCODED_SET_001_10_10,
+  ENCODED_SET_001_10_5,
   ENCODED_SET_001_1_1,
+  ENCODED_SET_001_20_1,
+  ENCODED_SET_001_20_10,
+  ENCODED_SET_001_20_20,
+  ENCODED_SET_001_40_1,
+  ENCODED_SET_001_40_10,
+  ENCODED_SET_001_40_20,
+  ENCODED_SET_001_40_40,
   ENCODED_SET_001_4_1,
   ENCODED_SET_001_4_2,
   ENCODED_SET_001_4_3,
   ENCODED_SET_001_4_4,
+  ENCODED_SET_001_5_1,
+  ENCODED_SET_001_5_3,
+  ENCODED_SET_001_5_5,
 } from '../helpers/set-data'
 
 describe.only('Onchain Opepen Set 001', function () {
@@ -111,42 +124,7 @@ describe.only('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data).to.deep.equal({
-        "id": "14468",
-        "name": "Set 001, 1/4 (#14468)",
-        "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_4_2,
-        "attributes": [
-          {
-            "trait_type": "Edition Size",
-            "value": "Four"
-          },
-          {
-            "trait_type": "Revealed",
-            "value": "Yes"
-          },
-          {
-            "trait_type": "Release",
-            "value": "001"
-          },
-          {
-            "trait_type": "Set",
-            "value": "8x8"
-          },
-          {
-            "trait_type": "Artist",
-            "value": "Jack Butcher"
-          },
-          {
-            "trait_type": "Opepen",
-            "value": "XII"
-          },
-          {
-            "trait_type": "Number",
-            "value": 14468
-          }
-        ]
-      })
+      expect(data.image).to.deep.equal(ENCODED_SET_001_4_2)
     })
 
     it('should render the 3/4', async function () {
@@ -156,42 +134,7 @@ describe.only('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data).to.deep.equal({
-        "id": "15205",
-        "name": "Set 001, 1/4 (#15205)",
-        "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_4_3,
-        "attributes": [
-          {
-            "trait_type": "Edition Size",
-            "value": "Four"
-          },
-          {
-            "trait_type": "Revealed",
-            "value": "Yes"
-          },
-          {
-            "trait_type": "Release",
-            "value": "001"
-          },
-          {
-            "trait_type": "Set",
-            "value": "8x8"
-          },
-          {
-            "trait_type": "Artist",
-            "value": "Jack Butcher"
-          },
-          {
-            "trait_type": "Opepen",
-            "value": "XII"
-          },
-          {
-            "trait_type": "Number",
-           "value": 15205
-          }
-        ]
-      })
+      expect(data.image).to.equal(ENCODED_SET_001_4_3)
     })
 
     it('should render the 4/4', async function () {
@@ -201,15 +144,27 @@ describe.only('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
+      expect(data.image).to.equal(ENCODED_SET_001_4_4)
+    })
+  })
+
+  describe('1/5', () => {
+    it('should render the 1/5', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 4676n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
       expect(data).to.deep.equal({
-        "id": "2461",
-        "name": "Set 001, 1/4 (#2461)",
+        "id": "4676",
+        "name": "Set 001, 1/5 (#4676)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_4_4,
+        "image": ENCODED_SET_001_5_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
-            "value": "Four"
+            "value": "Five"
           },
           {
             "trait_type": "Revealed",
@@ -229,14 +184,246 @@ describe.only('Onchain Opepen Set 001', function () {
           },
           {
             "trait_type": "Opepen",
-            "value": "XII"
+            "value": "IX"
           },
           {
             "trait_type": "Number",
-            "value": 2461
+            "value": 4676
           }
         ]
       })
+    })
+
+    it('should render the 3/5', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 7849n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_5_3)
+    })
+
+    it('should render the 5/5', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 8625n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_5_5)
+    })
+  })
+
+  describe('1/10', () => {
+    it('should render the 1/10', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 11106n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data).to.deep.equal({
+        "id": "11106",
+        "name": "Set 001, 1/10 (#11106)",
+        "description": "Consensus is temporary.",
+        "image": ENCODED_SET_001_10_1,
+        "attributes": [
+          {
+            "trait_type": "Edition Size",
+            "value": "Ten"
+          },
+          {
+            "trait_type": "Revealed",
+            "value": "Yes"
+          },
+          {
+            "trait_type": "Release",
+            "value": "001"
+          },
+          {
+            "trait_type": "Set",
+            "value": "8x8"
+          },
+          {
+            "trait_type": "Artist",
+            "value": "Jack Butcher"
+          },
+          {
+            "trait_type": "Opepen",
+            "value": "V"
+          },
+          {
+            "trait_type": "Number",
+            "value": 11106
+          }
+        ]
+      })
+    })
+
+    it('should render the 5/10', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 1035n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_10_5)
+    })
+
+    it('should render the 10/10', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 6010n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_10_10)
+    })
+  })
+
+  describe('1/20', () => {
+    it('should render the 1/20', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 4360n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data).to.deep.equal({
+        "id": "4360",
+        "name": "Set 001, 1/20 (#4360)",
+        "description": "Consensus is temporary.",
+        "image": ENCODED_SET_001_20_1,
+        "attributes": [
+          {
+            "trait_type": "Edition Size",
+            "value": "Twenty"
+          },
+          {
+            "trait_type": "Revealed",
+            "value": "Yes"
+          },
+          {
+            "trait_type": "Release",
+            "value": "001"
+          },
+          {
+            "trait_type": "Set",
+            "value": "8x8"
+          },
+          {
+            "trait_type": "Artist",
+            "value": "Jack Butcher"
+          },
+          {
+            "trait_type": "Opepen",
+            "value": "III"
+          },
+          {
+            "trait_type": "Number",
+            "value": 4360
+          }
+        ]
+      })
+    })
+
+    it('should render the 10/20', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 14532n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_20_10)
+    })
+
+    it('should render the 20/20', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 6527n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_20_20)
+    })
+  })
+
+
+  describe('1/40', () => {
+    it('should render the 1/40', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 14850n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data).to.deep.equal({
+        "id": "14850",
+        "name": "Set 001, 1/40 (#14850)",
+        "description": "Consensus is temporary.",
+        "image": ENCODED_SET_001_40_1,
+        "attributes": [
+          {
+            "trait_type": "Edition Size",
+            "value": "Forty"
+          },
+          {
+            "trait_type": "Revealed",
+            "value": "Yes"
+          },
+          {
+            "trait_type": "Release",
+            "value": "001"
+          },
+          {
+            "trait_type": "Set",
+            "value": "8x8"
+          },
+          {
+            "trait_type": "Artist",
+            "value": "Jack Butcher"
+          },
+          {
+            "trait_type": "Opepen",
+            "value": "I"
+          },
+          {
+            "trait_type": "Number",
+            "value": 14850
+          }
+        ]
+      })
+    })
+
+    it('should render the 10/40', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 5424n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_40_10)
+    })
+
+    it('should render the 20/40', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 4036n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_40_20)
+    })
+
+    it('should render the 40/40', async function () {
+      const { renderer } = await loadFixture(opepenArchiveSetPublishedFixture)
+
+      const dataURI = await renderer.read.tokenURI([ 14844n ])
+      const json = Buffer.from(dataURI.substring(29), `base64`).toString()
+      const data = JSON.parse(json)
+
+      expect(data.image).to.equal(ENCODED_SET_001_40_40)
     })
   })
 
