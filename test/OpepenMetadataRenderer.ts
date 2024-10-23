@@ -51,7 +51,6 @@ describe('OpepenMetadataRenderer', function () {
       "id": "151",
       "name": "Set 001, 1/1 (#151)",
       "description": "Consensus is temporary.",
-      // TODO: Implement custom renderer
       "image": ENCODED_SET_001_1_1,
       "attributes": [
         {

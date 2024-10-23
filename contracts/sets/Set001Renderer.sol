@@ -6,14 +6,13 @@ import { Base64    } from "@openzeppelin/contracts/utils/Base64.sol";
 import "../interfaces/ISetArtifactRenderer.sol";
 import "./checks/libraries/ChecksArt.sol";
 import "./checks/libraries/EightyColors.sol";
+import "./Set001ColorStorage.sol";
 
-contract Set001Renderer is ISetArtifactRenderer {
+import "hardhat/console.sol";
 
-    uint256 private constant ONE_OF_ONE_COLORS = 58158912268585443335777250615;
-
-    function getOneOfOneColors (uint256 index) public pure returns (string memory) {
+contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
+    function getColor (uint256 index) public view returns (string memory) {
         string[80] memory colors = EightyColors.COLORS();
-        uint8 index = uint8((ONE_OF_ONE_COLORS >> (index * 6)) & 0x3F);
 
         return string(abi.encodePacked('#', colors[index]));
     }
@@ -25,11 +24,13 @@ contract Set001Renderer is ISetArtifactRenderer {
         ));
     }
 
-    function generateSVG(uint256, uint8, uint8) public pure returns (bytes memory) {
+    function generateSVG(uint256, uint8 edition, uint8 editionIndex) public view returns (bytes memory) {
+        uint8[] memory editionColorIndexes = getColors(edition, editionIndex);
+
         string[16] memory colors;
 
         for (uint256 index = 0; index < 16; index++) {
-            colors[index] = getOneOfOneColors(index);
+            colors[index] = getColor(editionColorIndexes[index]);
         }
 
         return abi.encodePacked(
