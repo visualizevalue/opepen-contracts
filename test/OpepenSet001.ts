@@ -1,26 +1,7 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenArchiveSetPublishedFixture } from './fixtures'
-import {
-  ENCODED_SET_001_10_1,
-  ENCODED_SET_001_10_10,
-  ENCODED_SET_001_10_5,
-  ENCODED_SET_001_1_1,
-  ENCODED_SET_001_20_1,
-  ENCODED_SET_001_20_10,
-  ENCODED_SET_001_20_20,
-  ENCODED_SET_001_40_1,
-  ENCODED_SET_001_40_10,
-  ENCODED_SET_001_40_20,
-  ENCODED_SET_001_40_40,
-  ENCODED_SET_001_4_1,
-  ENCODED_SET_001_4_2,
-  ENCODED_SET_001_4_3,
-  ENCODED_SET_001_4_4,
-  ENCODED_SET_001_5_1,
-  ENCODED_SET_001_5_3,
-  ENCODED_SET_001_5_5,
-} from '../helpers/set-data'
+import { ENCODED_VISUALS } from '../helpers/set-data'
 
 describe('Onchain Opepen Set 001', function () {
 
@@ -36,7 +17,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "151",
         "name": "Set 001, 1/1 (#151)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_1_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_1_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -83,7 +64,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "2912",
         "name": "Set 001, 1/4 (#2912)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_4_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_4_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -124,7 +105,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.deep.equal(ENCODED_SET_001_4_2)
+      expect(data.image).to.deep.equal(ENCODED_VISUALS.SET_001.EDITION_4_2)
     })
 
     it('should render the 3/4', async function () {
@@ -134,7 +115,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_4_3)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_4_3)
     })
 
     it('should render the 4/4', async function () {
@@ -144,7 +125,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_4_4)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_4_4)
     })
   })
 
@@ -160,7 +141,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "4676",
         "name": "Set 001, 1/5 (#4676)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_5_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_5_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -201,7 +182,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_5_3)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_5_3)
     })
 
     it('should render the 5/5', async function () {
@@ -211,7 +192,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_5_5)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_5_5)
     })
   })
 
@@ -227,7 +208,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "11106",
         "name": "Set 001, 1/10 (#11106)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_10_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_10_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -268,7 +249,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_10_5)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_10_5)
     })
 
     it('should render the 10/10', async function () {
@@ -278,7 +259,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_10_10)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_10_10)
     })
   })
 
@@ -294,7 +275,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "4360",
         "name": "Set 001, 1/20 (#4360)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_20_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_20_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -335,7 +316,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_20_10)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_20_10)
     })
 
     it('should render the 20/20', async function () {
@@ -345,7 +326,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_20_20)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_20_20)
     })
   })
 
@@ -362,7 +343,7 @@ describe('Onchain Opepen Set 001', function () {
         "id": "14850",
         "name": "Set 001, 1/40 (#14850)",
         "description": "Consensus is temporary.",
-        "image": ENCODED_SET_001_40_1,
+        "image": ENCODED_VISUALS.SET_001.EDITION_40_1,
         "attributes": [
           {
             "trait_type": "Edition Size",
@@ -403,7 +384,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_40_10)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_40_10)
     })
 
     it('should render the 20/40', async function () {
@@ -413,7 +394,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_40_20)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_40_20)
     })
 
     it('should render the 40/40', async function () {
@@ -423,7 +404,7 @@ describe('Onchain Opepen Set 001', function () {
       const json = Buffer.from(dataURI.substring(29), `base64`).toString()
       const data = JSON.parse(json)
 
-      expect(data.image).to.equal(ENCODED_SET_001_40_40)
+      expect(data.image).to.equal(ENCODED_VISUALS.SET_001.EDITION_40_40)
     })
   })
 

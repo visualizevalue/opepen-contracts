@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { opepenArchiveSetPublishedFixture, opepenMetadataRendererFixture } from './fixtures'
-import { ENCODED_SET_001_1_1 } from '../helpers/set-data'
+import { ENCODED_VISUALS } from '../helpers/set-data'
 
 describe('OpepenMetadataRenderer', function () {
 
@@ -51,7 +51,7 @@ describe('OpepenMetadataRenderer', function () {
       "id": "151",
       "name": "Set 001, 1/1 (#151)",
       "description": "Consensus is temporary.",
-      "image": ENCODED_SET_001_1_1,
+      "image": ENCODED_VISUALS.SET_001.EDITION_1_1,
       "attributes": [
         {
           "trait_type": "Edition Size",
