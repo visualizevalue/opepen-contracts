@@ -22,7 +22,7 @@ import {
   ENCODED_SET_001_5_5,
 } from '../helpers/set-data'
 
-describe.only('Onchain Opepen Set 001', function () {
+describe('Onchain Opepen Set 001', function () {
 
   describe('1/1', () => {
     it('should render the 1/1', async function () {
