@@ -39,16 +39,38 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         );
     }
 
-    function paddedSetId (uint8 set) internal pure returns (string memory) {
-        string memory id = Strings.toString(set);
+    /// @notice Token URI information getter
+    /// @param id to get uri for
+    /// @return contract uri (if set)
+    function tokenURI(uint256 id) external view returns (string memory) {
+        // Gather data
+        uint8 tokenSet             = archive.getTokenSet(id);
+        uint8 tokenSetEditionIndex = archive.getTokenSetEditionId(id);
+        uint8 tokenEdition         = archive.getTokenEdition(id);
+        SetData memory setData     = archive.getSetData(tokenSet);
 
-        return set < 10
-            ? string(abi.encodePacked("00", id))
-            : set < 100
-            ? string(abi.encodePacked("0", id))
-            : id;
+        // Transform data
+        string memory tokenId = Strings.toString(id);
+
+        bytes memory dataURI = abi.encodePacked('{'
+            '"id": "', tokenId, '",'
+            '"name": "', tokenName(tokenId, tokenSet, tokenEdition), '",'
+            '"description": "', archive.description(), '",',
+            renderArtifact(id, tokenSet, tokenEdition, tokenSetEditionIndex, setData),
+            '"attributes": [',
+                renderTokenAttributes(tokenId, tokenSet, tokenEdition, setData),
+            ']'
+        '}');
+
+        return string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(dataURI)
+            )
+        );
     }
 
+    /// @dev Render the token name (dependent on whether it's revealed/unrevealed)
     function tokenName (
         string memory id,
         uint8 tokenSet,
@@ -65,19 +87,18 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             ));
     }
 
-    function renderTokenEdition (uint8 tokenEdition) internal pure returns (string memory) {
-        return tokenEdition ==  1 ? 'One'
-             : tokenEdition ==  4 ? 'Four'
-             : tokenEdition ==  5 ? 'Five'
-             : tokenEdition == 10 ? 'Ten'
-             : tokenEdition == 20 ? 'Twenty'
-                                  : 'Forty';
+    /// @dev Ensure set IDs are three digits (with 0 prepended)
+    function paddedSetId (uint8 set) internal pure returns (string memory) {
+        string memory id = Strings.toString(set);
+
+        return set < 10
+            ? string(abi.encodePacked("00", id))
+            : set < 100
+            ? string(abi.encodePacked("0", id))
+            : id;
     }
 
-    function renderRevealed (uint8 tokenSet) internal pure returns (string memory) {
-        return tokenSet > 0 ? 'Yes' : 'No';
-    }
-
+    /// @dev Render the token artifact
     function renderArtifact(
         uint256 id,
         uint8 tokenSet,
@@ -117,6 +138,31 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         );
     }
 
+    /// @dev Render the tokens metadata attributes
+    function renderTokenAttributes(
+        string memory tokenId,
+        uint8 tokenSet,
+        uint8 tokenEdition,
+        SetData memory setData
+    ) internal view returns (string memory) {
+        return string(abi.encodePacked(
+            '{'
+                '"trait_type": "Edition Size",'
+                '"value": "', renderTokenEdition(tokenEdition), '"'
+            '},'
+            '{'
+                '"trait_type": "Revealed",'
+                '"value": "', renderRevealed(tokenSet), '"'
+            '},',
+            tokenSet > 0 ? renderTokenSetAttributes(tokenSet, tokenEdition, setData) : '',
+            '{'
+                '"trait_type": "Number",'
+                '"value": ', tokenId,
+            '}'
+        ));
+    }
+
+    /// @dev Render token attributes specific to a set
     function renderTokenSetAttributes(
         uint8 tokenSet,
         uint8 tokenEdition,
@@ -149,58 +195,19 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         ));
     }
 
-    function renderTokenAttributes(
-        string memory tokenId,
-        uint8 tokenSet,
-        uint8 tokenEdition,
-        SetData memory setData
-    ) internal view returns (string memory) {
-        return string(abi.encodePacked(
-            '{'
-                '"trait_type": "Edition Size",'
-                '"value": "', renderTokenEdition(tokenEdition), '"'
-            '},'
-            '{'
-                '"trait_type": "Revealed",'
-                '"value": "', renderRevealed(tokenSet), '"'
-            '},',
-            tokenSet > 0 ? renderTokenSetAttributes(tokenSet, tokenEdition, setData) : '',
-            '{'
-                '"trait_type": "Number",'
-                '"value": ', tokenId,
-            '}'
-        ));
+    /// @dev Render the token edition as a written word
+    function renderTokenEdition (uint8 tokenEdition) internal pure returns (string memory) {
+        return tokenEdition ==  1 ? 'One'
+             : tokenEdition ==  4 ? 'Four'
+             : tokenEdition ==  5 ? 'Five'
+             : tokenEdition == 10 ? 'Ten'
+             : tokenEdition == 20 ? 'Twenty'
+                                  : 'Forty';
     }
 
-    /// @notice Token URI information getter
-    /// @param id to get uri for
-    /// @return contract uri (if set)
-    function tokenURI(uint256 id) external view returns (string memory) {
-        // Gather data
-        uint8 tokenSet             = archive.getTokenSet(id);
-        uint8 tokenSetEditionIndex = archive.getTokenSetEditionId(id);
-        uint8 tokenEdition         = archive.getTokenEdition(id);
-        SetData memory setData     = archive.getSetData(tokenSet);
-
-        // Transform data
-        string memory tokenId = Strings.toString(id);
-
-        bytes memory dataURI = abi.encodePacked('{'
-            '"id": "', tokenId, '",'
-            '"name": "', tokenName(tokenId, tokenSet, tokenEdition), '",'
-            '"description": "', archive.description(), '",',
-            renderArtifact(id, tokenSet, tokenEdition, tokenSetEditionIndex, setData),
-            '"attributes": [',
-                renderTokenAttributes(tokenId, tokenSet, tokenEdition, setData),
-            ']'
-        '}');
-
-        return string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(dataURI)
-            )
-        );
+    /// @dev Render the revealed state to a string
+    function renderRevealed (uint8 tokenSet) internal pure returns (string memory) {
+        return tokenSet > 0 ? 'Yes' : 'No';
     }
 
     /// @dev We don't need to do anything in here, as we don't hold this data onchain.
