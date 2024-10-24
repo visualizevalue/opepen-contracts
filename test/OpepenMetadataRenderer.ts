@@ -22,7 +22,7 @@ describe('OpepenMetadataRenderer', function () {
       "id": "1",
       "name": "Unrevealed, 1/5 (#1)",
       "description": "Consensus is temporary.",
-      "image": "ipfs://QmVXvZ5Sp6aSDBrWvtJ5gZ3bwNWRqqY3iPvyF8nveWj5HF/5.png",
+      "image": ENCODED_VISUALS.UNREVEALED.EDITION_5,
       "attributes": [
         {
           "trait_type": "Edition Size",

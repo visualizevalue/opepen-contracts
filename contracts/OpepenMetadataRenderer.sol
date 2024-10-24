@@ -7,6 +7,7 @@ import { IERC721Drop                } from "./interfaces/IERC721Drop.sol";
 import { IMetadataRenderer          } from "./interfaces/IMetadataRenderer.sol";
 import { ISetArtifactRenderer       } from "./interfaces/ISetArtifactRenderer.sol";
 import { NFTMetadataRenderer        } from "./libraries/NFTMetadataRenderer.sol";
+import { UnrevealedOpepenRenderer   } from "./libraries/UnrevealedOpepenRenderer.sol";
 import { SetData                    } from "./types/SetData.sol";
 import { MetadataRenderAdminCheck   } from "./MetadataRenderAdminCheck.sol";
 import { TheOpepenArchive           } from "./TheOpepenArchive.sol";
@@ -111,17 +112,7 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
 
         string memory image = artifactRendererAddress != address(0)
             ? artifactRenderer.imageUrl(id, tokenEdition, tokenSetEditionIndex)
-            : string(abi.encodePacked(
-                "ipfs://",
-                tokenSet <= 0
-                    // TODO: Render blank opepen onchain
-                    ? string(abi.encodePacked(
-                        'QmVXvZ5Sp6aSDBrWvtJ5gZ3bwNWRqqY3iPvyF8nveWj5HF/',
-                        Strings.toString(tokenEdition),
-                        '.png'
-                      ))
-                    : setData.imageCid
-            ));
+            : UnrevealedOpepenRenderer.imageURI(tokenEdition);
 
         bool hasAnimationCid = bytes(setData.animationCid).length > 0;
         bool hasCustomRenderer = artifactRendererAddress != address(0);
