@@ -1,22 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { Strings   } from "@openzeppelin/contracts/utils/Strings.sol";
-import { Base64    } from "@openzeppelin/contracts/utils/Base64.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 import "../interfaces/ISetArtifactRenderer.sol";
 import "./checks/libraries/ChecksArt.sol";
 import "./checks/libraries/EightyColors.sol";
 import "./Set001ColorStorage.sol";
 
-import "hardhat/console.sol";
-
 contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
-    function renderColor (uint256 index) public view returns (string memory) {
-        string[80] memory colors = EightyColors.COLORS();
 
-        return string(abi.encodePacked('#', colors[index]));
-    }
-
+    // @notice Renders the image as an SVG
     function imageUrl(uint256 id, uint8 edition, uint8 editionIndex) external view returns (string memory) {
         return string(abi.encodePacked(
             'data:image/svg+xml;base64,',
@@ -24,15 +18,13 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         ));
     }
 
-    function generateSVG(uint256, uint8 edition, uint8 editionIndex) public view returns (bytes memory) {
-        uint8[] memory editionColorIndexes = getColors(edition, editionIndex);
+    // @notice Set 001 doesn't have an animation
+    function animationUrl(uint256, uint8, uint8) external pure returns (string memory) {
+        return "";
+    }
 
-        string[16] memory colors;
-
-        for (uint256 index = 0; index < 16; index++) {
-            colors[index] = renderColor(editionColorIndexes[index]);
-        }
-
+    // @dev Render the SVG body
+    function generateSVG(uint256, uint8 edition, uint8 editionIndex) internal view returns (bytes memory) {
         return abi.encodePacked(
             '<svg width="1400" height="1400" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">'
                 // Background
@@ -41,7 +33,7 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
                 '<use x="472" y="131" transform="scale(0.8)" href="#check" fill="#fff" />',
                 // Opepen
                 '<g>',
-                      generateParts(colors),
+                      generateParts(edition, editionIndex),
                 '</g>'
                 // Reusable Definitions
                 '<defs>'
@@ -72,7 +64,10 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         );
     }
 
-    function generateParts(string[16] memory colors) internal pure returns (bytes memory) {
+    // @dev Generate the 16 tiles of the opepen
+    function generateParts(uint8 edition, uint8 editionIndex) internal view returns (bytes memory) {
+        string[16] memory colors = getHexColors(edition, editionIndex);
+
         return abi.encodePacked(
             generateEyes(colors),
             generateMouth(colors),
@@ -80,6 +75,17 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         );
     }
 
+    // @dev Gather the colors for our token
+    function getHexColors(uint8 edition, uint8 editionIndex) internal view returns (string[16] memory colors) {
+        uint8[] memory editionColorIndexes = getColorIndexes(edition, editionIndex);
+
+        // Render the colors into hex strings
+        for (uint256 index = 0; index < 16; index++) {
+            colors[index] = renderColor(editionColorIndexes[index]);
+        }
+    }
+
+    // @dev Render the eyes of our token
     function generateEyes(string[16] memory colors) internal pure returns (bytes memory) {
         return abi.encodePacked(
             // Left Eye
@@ -97,6 +103,7 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         );
     }
 
+    // @dev Render the mouth of our token
     function generateMouth(string[16] memory colors) internal pure returns (bytes memory) {
         return abi.encodePacked(
             '<g transform="translate(128, 256)">'
@@ -112,6 +119,7 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         );
     }
 
+    // @dev Render the torso
     function generateTorso(string[16] memory colors) internal pure returns (bytes memory) {
         return abi.encodePacked(
             '<g transform="translate(128, 448)">'
@@ -123,8 +131,11 @@ contract Set001Renderer is ISetArtifactRenderer, Set001ColorStorage {
         );
     }
 
-    function animationUrl(uint256, uint8, uint8) external pure returns (string memory) {
-        return "";
+    // @dev Transform a checks color index to its hex code
+    function renderColor (uint256 index) public pure returns (string memory) {
+        string[80] memory colors = EightyColors.COLORS();
+
+        return string(abi.encodePacked('#', colors[index]));
     }
 
 }
