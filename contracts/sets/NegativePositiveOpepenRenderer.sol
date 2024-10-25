@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import "../interfaces/ISetArtifactRenderer.sol";
 import "./checks/libraries/ChecksArt.sol";
 
-contract Set058Renderer is ISetArtifactRenderer {
+contract NegativePositiveOpepenRenderer is ISetArtifactRenderer {
 
     // @notice Renders the image as an SVG
     function imageUrl(uint256, uint8 edition, uint8) external view returns (string memory) {
@@ -21,7 +21,7 @@ contract Set058Renderer is ISetArtifactRenderer {
     }
 
     // @dev Render the SVG body
-    function svg(bool positive) public view returns (bytes memory) {
+    function svg(bool positive) public pure returns (bytes memory) {
         return abi.encodePacked(
             '<svg width="1400" height="1400" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg">'
                 '<g ', positive ? 'filter="url(#invvert)"' : '', '>'

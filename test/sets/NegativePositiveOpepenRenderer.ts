@@ -1,9 +1,9 @@
 import hre from 'hardhat'
 import { expect } from 'chai'
-import { ENCODED_VISUALS } from '../helpers/set-data'
-import Set058RendererModule from '../ignition/modules/Set058Renderer'
+import { ENCODED_VISUALS } from '../../helpers/set-data'
+import Set058RendererModule from '../../ignition/modules/sets/NegativePositiveOpepenRenderer'
 
-describe.only('Onchain "Negative, Positive" Opepen Set', function () {
+describe('Onchain "Negative, Positive" Opepen Set', function () {
 
   it('should render the negative', async function () {
     const { renderer } = await hre.ignition.deploy(Set058RendererModule)

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { opepenArchiveSetPublishedFixture } from './fixtures'
-import { ENCODED_VISUALS } from '../helpers/set-data'
+import { opepenArchiveSetPublishedFixture } from '../fixtures'
+import { ENCODED_VISUALS } from '../../helpers/set-data'
 
 describe('Onchain Opepen Set 001', function () {
 
