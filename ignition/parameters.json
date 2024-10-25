@@ -1,5 +1,9 @@
 {
   "OpepenMetadataRenderer": {
     "archive": "0x"
+  },
+  "Set001Renderer": {
+    "checksArt": "0x3bcBf1480879BFF8435b1534C70B4a5182FB2466",
+    "eightyColors": "0x3ee78a90f3a812b68b022F1005c326fA006BCB89"
   }
 }
