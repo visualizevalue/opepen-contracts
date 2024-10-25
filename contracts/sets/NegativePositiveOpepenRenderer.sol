@@ -8,7 +8,7 @@ import "./checks/libraries/ChecksArt.sol";
 contract NegativePositiveOpepenRenderer is ISetArtifactRenderer {
 
     // @notice Renders the image as an SVG
-    function imageUrl(uint256, uint8 edition, uint8) external view returns (string memory) {
+    function imageUrl(uint256, uint8 edition, uint8) external pure returns (string memory) {
         return string(abi.encodePacked(
             'data:image/svg+xml;base64,',
             Base64.encode(svg(edition > 1))

@@ -135,7 +135,7 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         uint8 tokenSet,
         uint8 tokenEdition,
         SetData memory setData
-    ) internal view returns (string memory) {
+    ) internal pure returns (string memory) {
         return string(abi.encodePacked(
             '{'
                 '"trait_type": "Edition Size",'
@@ -158,7 +158,7 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         uint8 tokenSet,
         uint8 tokenEdition,
         SetData memory setData
-    ) internal view returns (string memory) {
+    ) internal pure returns (string memory) {
         return string(abi.encodePacked(
             '{'
                 '"trait_type": "Release",'

@@ -33,7 +33,7 @@ contract SetArtifactRenderer is ISetArtifactRenderer {
         }
     }
 
-    function imageUrl(uint256 id, uint8 edition, uint8 editionIndex) external view returns (string memory) {
+    function imageUrl(uint256, uint8 edition, uint8 editionIndex) external view returns (string memory) {
         SetData memory data = abi.decode(readData(), (SetData));
 
         return string(abi.encodePacked(

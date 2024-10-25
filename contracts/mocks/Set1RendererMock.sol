@@ -5,11 +5,11 @@ import "./../interfaces/ISetArtifactRenderer.sol";
 
 contract Set1RendererMock is ISetArtifactRenderer {
 
-    function imageUrl(uint256, uint8, uint8) external view returns (string memory) {
+    function imageUrl(uint256, uint8, uint8) external pure returns (string memory) {
         return "hello-opepen-set-1";
     }
 
-    function animationUrl(uint256, uint8, uint8) external view returns (string memory) {
+    function animationUrl(uint256, uint8, uint8) external pure returns (string memory) {
         return "";
     }
 
