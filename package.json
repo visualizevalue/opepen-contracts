@@ -16,7 +16,6 @@
     "@types/chai": "^4.2.0",
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": ">=9.1.0",
-    "@visualizevalue/mint-utils": "workspace:../utils",
     "abitype": "^1.0.6",
     "chai": "^4.2.0",
     "dotenv": "^16.4.5",
