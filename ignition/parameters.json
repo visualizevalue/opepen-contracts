@@ -1,4 +1,8 @@
 {
+  "NegativePositiveOpepenRenderer": {
+    "signatures": "0xDE04A2537f84C8176f1B3F624405419a1E28C3F0",
+    "signer": "0xe11Da9560b51f8918295edC5ab9c0a90E9ADa20B"
+  },
   "OpepenMetadataRenderer": {
     "archive": "0x"
   },

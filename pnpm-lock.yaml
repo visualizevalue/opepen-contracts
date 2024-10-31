@@ -50,6 +50,9 @@ importers:
       '@types/mocha':
         specifier: '>=9.1.0'
         version: 10.0.7
+      '@visualizevalue/signature-repository':
+        specifier: 1.0.0
+        version: 1.0.0
       abitype:
         specifier: ^1.0.6
         version: 1.0.6(typescript@5.0.4)
@@ -546,6 +549,9 @@ packages:
 
   '@types/w3c-web-usb@1.0.10':
     resolution: {integrity: sha512-CHgUI5kTc/QLMP8hODUHhge0D4vx+9UiAwIGiT0sTy/B2XpdX1U5rJt6JSISgr6ikRT7vxV9EVAFeYZqUnl1gQ==}
+
+  '@visualizevalue/signature-repository@1.0.0':
+    resolution: {integrity: sha512-XN2AdUKqq3eFmpNSmgBabKPym1mqxxVWrOhh92tcq61GYAVI11xI+RNYarQmiDxVe8/mG+Ji5ewA3lUW4OudMw==}
 
   abbrev@1.0.9:
     resolution: {integrity: sha512-LEyx4aLEC3x6T0UguF6YILf+ntvmOaWsVfENmIW0E9H09vKlLDGelMjjSm0jkDHALj8A8quZ/HapKNigzwge+Q==}
@@ -2867,6 +2873,8 @@ snapshots:
       '@types/node': 22.5.4
 
   '@types/w3c-web-usb@1.0.10': {}
+
+  '@visualizevalue/signature-repository@1.0.0': {}
 
   abbrev@1.0.9: {}
 

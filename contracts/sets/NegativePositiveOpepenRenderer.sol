@@ -2,16 +2,39 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/utils/Base64.sol";
+import "@visualizevalue/signature-repository/contracts/interfaces/ISignatureRepository.sol";
 import "../interfaces/ISetArtifactRenderer.sol";
 import "./checks/libraries/ChecksArt.sol";
 
 contract NegativePositiveOpepenRenderer is ISetArtifactRenderer {
 
+    ISignatureRepository public signatures;
+    address public signer;
+
+    constructor (address _signatures, address _signer) {
+        signatures = ISignatureRepository(_signatures);
+        signer = _signer;
+    }
+
     // @notice Renders the image as an SVG
-    function imageUrl(uint256, uint8 edition, uint8) external pure returns (string memory) {
+    function imageUrl(uint256, uint8 edition, uint8 editionIndex) external view returns (string memory) {
+        // Zero based edition index
+        uint8 idx = editionIndex > 0 ? editionIndex - 1 : editionIndex;
+
+        // Our signature index (0-79)
+        uint8 signatureIndex = edition ==  1 ? 0
+                             : edition ==  4 ? idx
+                             : edition ==  5 ? 4 + idx
+                             : edition == 10 ? 4 + 5 + idx
+                             : edition == 20 ? 4 + 5 + 10 + idx
+                                             : 4 + 5 + 10 + 20 + idx;
+
+        // FIXME: Replace as soon as jacks sigs are inscribed
+        signatureIndex = 0;
+
         return string(abi.encodePacked(
             'data:image/svg+xml;base64,',
-            Base64.encode(svg(edition > 1))
+            Base64.encode(svg(edition > 1, signatureIndex))
         ));
     }
 
@@ -21,7 +44,7 @@ contract NegativePositiveOpepenRenderer is ISetArtifactRenderer {
     }
 
     // @dev Render the SVG body
-    function svg(bool positive) public pure returns (bytes memory) {
+    function svg(bool positive, uint8 signatureIndex) public view returns (bytes memory) {
         return abi.encodePacked(
             '<svg width="1400" height="1400" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg">'
                 '<g ', positive ? 'filter="url(#invvert)"' : '', '>'
@@ -54,7 +77,14 @@ contract NegativePositiveOpepenRenderer is ISetArtifactRenderer {
                             '</g>'
                         '</g>'
                     '</g>'
-                '</g>'
+                '</g>',
+                positive
+                    ? string(abi.encodePacked(
+                        '<g transform="translate(6.5, 6.5) scale(0.2)">',
+                            signatures.svg(signer, signatureIndex, '#CBCBCB', '6px'),
+                        '</g>'
+                    ))
+                    : '',
                 // Reusable Definitions
                 '<defs>'
                     '<path id="1x1_bl" d="M 0 0A 1 1, 0, 0, 0, 1 1L 1 0 Z"/>'
