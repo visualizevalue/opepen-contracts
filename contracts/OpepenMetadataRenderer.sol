@@ -24,9 +24,9 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     }
 
     /// @notice Contract URI information getter
-    /// @return contract uri (if set)
     function contractURI() external view override returns (string memory) {
-        bytes memory dataURI = abi.encodePacked('{'
+        // FIXME: Make image onchain
+        bytes memory data = abi.encodePacked('{'
             '"name": "Opepen",'
             '"description": "', archive.description, '",'
             '"image": "ipfs://bafybeidhmw3gazojgwqieyhj2ace23qdyt3frmirt4pe25jgzn4veeza3q"'
@@ -35,14 +35,13 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         return string(
             abi.encodePacked(
                 "data:application/json;base64,",
-                Base64.encode(dataURI)
+                Base64.encode(data)
             )
         );
     }
 
     /// @notice Token URI information getter
-    /// @param id to get uri for
-    /// @return contract uri (if set)
+    /// @param id The token ID get the uri for
     function tokenURI(uint256 id) external view returns (string memory) {
         // Gather data
         uint8 tokenSet             = archive.getTokenSet(id);
@@ -53,7 +52,7 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         // Transform data
         string memory tokenId = Strings.toString(id);
 
-        bytes memory dataURI = abi.encodePacked('{'
+        bytes memory data = abi.encodePacked('{'
             '"id": "', tokenId, '",'
             '"name": "', tokenName(tokenId, tokenSet, tokenEdition), '",'
             '"description": "', archive.description(), '",',
@@ -66,7 +65,7 @@ contract OpepenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         return string(
             abi.encodePacked(
                 "data:application/json;base64,",
-                Base64.encode(dataURI)
+                Base64.encode(data)
             )
         );
     }
