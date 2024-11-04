@@ -119,7 +119,7 @@ contract TheOpepenArchive is SetManager {
         }
 
         // Write the contract image to storage.
-        for (uint8 i = 0; i < data.length; i++) {
+        for (uint256 i = 0; i < data.length; i++) {
             setData[set].push(SSTORE2.write(data[i]));
         }
     }
